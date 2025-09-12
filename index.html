@@ -8,80 +8,105 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="customizer-container">
-        <header>
-            <h1>Classic performance polo</h1>
-        </header>
-        
-        <div class="content-grid">
-            <div class="product-section">
-                <div class="product-preview">
-                    <img id="product-image" src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=500&fit=crop&crop=center" alt="Classic performance polo" />
+    <div class="customizer-wrapper">
+        <div class="customizer-container">
+            <!-- Left Side - Product Image -->
+            <div class="product-side">
+                <div class="product-header">
+                    <h1>Classic performance polo</h1>
+                </div>
+                <div class="product-display">
+                    <div class="product-image-container">
+                        <img id="product-image" src="https://images.unsplash.com/photo-1581655353564-df123a1eb820?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aGl0ZSUyMHBvbG8lMjBzaGlydCUyMHByb2R1Y3R8ZW58MXx8fHwxNzU3Njg3MzMyfDA&ixlib=rb-4.1.0&q=80&w=1080" alt="White polo shirt" />
+                        <div id="logo-overlay" class="logo-overlay hidden"></div>
+                    </div>
                 </div>
             </div>
-            
-            <div class="controls-section">
-                <div class="control-group">
-                    <h3>Select logo</h3>
-                    <div class="search-bar">
-                        <input type="text" id="logo-search" placeholder="Search for logos..." />
+
+            <!-- Right Side - Controls -->
+            <div class="controls-side">
+                <div class="controls-content">
+                    <!-- Logo Selection -->
+                    <div class="control-section">
+                        <label class="control-label">Select logo</label>
+                        
+                        <div class="search-container">
+                            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <path d="m21 21-4.35-4.35"></path>
+                            </svg>
+                            <input type="text" id="logo-search" placeholder="Search for logos..." />
+                        </div>
+
+                        <div class="logo-grid" id="logo-grid">
+                            <!-- Logos will be populated by JavaScript -->
+                        </div>
+
+                        <div id="search-results-info" class="search-info hidden"></div>
+                        <div id="no-results" class="no-results hidden">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <path d="m21 21-4.35-4.35"></path>
+                            </svg>
+                            <p id="no-results-text">No logos found</p>
+                            <p class="no-results-subtitle">Try a different search term</p>
+                        </div>
                     </div>
-                    <div class="logo-grid">
-                        <div class="logo-option selected" data-logo="company-a">
-                            <div class="logo-icon">🏢</div>
-                            <span>Company logo A</span>
+
+                    <!-- Logo Placement -->
+                    <div class="control-section">
+                        <label class="control-label">Logo placement</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="placement" value="left" checked />
+                                <span class="radio-custom"></span>
+                                <span>Left chest</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="placement" value="right" />
+                                <span class="radio-custom"></span>
+                                <span>Right chest</span>
+                            </label>
                         </div>
-                        <div class="logo-option" data-logo="company-b">
-                            <div class="logo-icon">⭐</div>
-                            <span>Company logo B</span>
+                    </div>
+
+                    <!-- Thread Colors -->
+                    <div class="control-section">
+                        <label class="control-label">Thread color</label>
+                        <div class="thread-color-options" id="thread-color-options">
+                            <!-- Thread color options will be populated by JavaScript -->
                         </div>
-                        <div class="logo-option" data-logo="company-c">
-                            <div class="logo-icon">🔥</div>
-                            <span>Company logo C</span>
+                    </div>
+
+                    <!-- Size Options -->
+                    <div class="control-section">
+                        <label class="control-label">Size options</label>
+                        <div class="size-grid">
+                            <button class="size-option">XS</button>
+                            <button class="size-option">S</button>
+                            <button class="size-option">M</button>
+                            <button class="size-option">L</button>
+                            <button class="size-option">XL</button>
+                            <button class="size-option">XXL</button>
                         </div>
-                        <div class="logo-option" data-logo="company-d">
-                            <div class="logo-icon">💎</div>
-                            <span>Company logo D</span>
+                    </div>
+
+                    <!-- Quantity -->
+                    <div class="control-section">
+                        <label class="control-label">Quantity</label>
+                        <div class="quantity-controls">
+                            <button class="quantity-btn" id="qty-minus">−</button>
+                            <span class="quantity-display" id="quantity">1</span>
+                            <button class="quantity-btn" id="qty-plus">+</button>
                         </div>
                     </div>
                 </div>
 
-                <div class="control-group">
-                    <h3>Logo placement</h3>
-                    <div class="radio-group">
-                        <label class="radio-option">
-                            <input type="radio" name="placement" value="left-chest" checked />
-                            <span>Left chest</span>
-                        </label>
-                        <label class="radio-option">
-                            <input type="radio" name="placement" value="right-chest" />
-                            <span>Right chest</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <h3>Thread color</h3>
-                    <div class="color-dropdown">
-                        <select id="thread-color">
-                            <option value="club-colors">Club colors</option>
-                            <option value="color-coordinated">Color coordinated</option>
-                            <option value="tonal">Tonal</option>
-                        </select>
-                        <div class="color-description">Brand-specific thread colors</div>
-                        <div class="color-swatches">
-                            <div class="color-swatch" style="background-color: #333;"></div>
-                            <div class="color-swatch" style="background-color: #dc3545;"></div>
-                            <div class="color-swatch" style="background-color: #007bff;"></div>
-                            <div class="color-swatch" style="background-color: #28a745;"></div>
-                        </div>
-                    </div>
+                <!-- Add to Cart Button -->
+                <div class="cart-button-container">
+                    <button class="add-to-cart-btn" id="add-to-cart">Add to cart</button>
                 </div>
             </div>
-        </div>
-        
-        <div class="actions">
-            <button id="add-to-cart-btn" class="btn-primary">Add to cart</button>
         </div>
     </div>
     
