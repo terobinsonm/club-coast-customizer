@@ -187,20 +187,44 @@ const logoData = [
     }
 ];
 
-// Thread color options
-const threadColors = [
-    { name: 'White', value: '#FFFFFF', border: '#E5E7EB' },
-    { name: 'Black', value: '#000000' },
-    { name: 'Navy', value: '#1E3A8A' },
-    { name: 'Red', value: '#DC2626' },
-    { name: 'Green', value: '#059669' },
-    { name: 'Gold', value: '#D97706' }
+// Thread color collections - Grouped options
+const threadColorCollections = [
+    {
+        name: 'Club Colors',
+        description: 'Traditional golf club colors',
+        colors: [
+            { name: 'White', value: '#FFFFFF', border: '#E5E7EB' },
+            { name: 'Navy', value: '#1E3A8A' },
+            { name: 'Hunter Green', value: '#166534' },
+            { name: 'Burgundy', value: '#991B1B' }
+        ]
+    },
+    {
+        name: 'Coordinated',
+        description: 'Colors that complement the garment',
+        colors: [
+            { name: 'Charcoal', value: '#374151' },
+            { name: 'Stone', value: '#78716C' },
+            { name: 'Sage', value: '#84CC16' },
+            { name: 'Steel Blue', value: '#0EA5E9' }
+        ]
+    },
+    {
+        name: 'Tonal',
+        description: 'Subtle variations of the garment color',
+        colors: [
+            { name: 'Light Gray', value: '#D1D5DB' },
+            { name: 'Medium Gray', value: '#9CA3AF' },
+            { name: 'Dark Gray', value: '#6B7280' },
+            { name: 'Charcoal', value: '#374151' }
+        ]
+    }
 ];
 
 // State variables
 let selectedLogo = null;
 let selectedPlacement = 'left';
-let selectedThreadColor = threadColors[0];
+let selectedThreadColor = threadColorCollections[0]; // Default to first collection
 let selectedSize = null;
 let quantity = 1;
 
@@ -255,33 +279,55 @@ function updateLogoOverlay() {
     }
 }
 
-// Initialize thread colors
+// Initialize thread colors - Grouped collections
 function initializeThreadColors() {
     const container = document.getElementById('thread-color-options');
     container.innerHTML = '';
     
-    threadColors.forEach((color, index) => {
-        const colorOption = document.createElement('div');
-        colorOption.className = `thread-color ${index === 0 ? 'selected' : ''}`;
-        colorOption.style.backgroundColor = color.value;
-        if (color.border) {
-            colorOption.style.border = `2px solid ${color.border}`;
-        }
-        colorOption.title = color.name;
+    threadColorCollections.forEach((collection, collectionIndex) => {
+        const collectionOption = document.createElement('div');
+        collectionOption.className = `thread-color-option ${collectionIndex === 0 ? 'selected' : ''}`;
         
-        colorOption.addEventListener('click', () => selectThreadColor(color, colorOption));
-        container.appendChild(colorOption);
+        collectionOption.innerHTML = `
+            <div class="thread-color-header">
+                <div class="thread-color-info">
+                    <div class="thread-color-name">${collection.name}</div>
+                    <div class="thread-color-desc">${collection.description}</div>
+                </div>
+                <div class="thread-color-indicator ${collectionIndex === 0 ? '' : 'hidden'}"></div>
+            </div>
+            <div class="thread-color-swatches">
+                ${collection.colors.map(color => 
+                    `<div class="color-swatch" style="background-color: ${color.value}; ${color.border ? `border-color: ${color.border};` : ''}" title="${color.name}"></div>`
+                ).join('')}
+            </div>
+        `;
+        
+        collectionOption.addEventListener('click', () => selectThreadColorCollection(collection, collectionOption));
+        container.appendChild(collectionOption);
     });
 }
 
-// Select thread color
-function selectThreadColor(color, element) {
-    document.querySelectorAll('.thread-color').forEach(item => {
+// Select thread color collection
+function selectThreadColorCollection(collection, element) {
+    // Remove previous selection
+    document.querySelectorAll('.thread-color-option').forEach(item => {
         item.classList.remove('selected');
+        const indicator = item.querySelector('.thread-color-indicator');
+        if (indicator) {
+            indicator.classList.add('hidden');
+        }
     });
     
+    // Add selection to clicked item
     element.classList.add('selected');
-    selectedThreadColor = color;
+    const indicator = element.querySelector('.thread-color-indicator');
+    if (indicator) {
+        indicator.classList.remove('hidden');
+    }
+    
+    selectedThreadColor = collection;
+    console.log('Selected thread color collection:', collection.name);
 }
 
 // Setup event listeners
