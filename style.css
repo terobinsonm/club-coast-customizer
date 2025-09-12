@@ -444,6 +444,29 @@ body {
   background: rgba(48, 48, 48, 0.9);
 }
 
+.logo-preview-img {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    margin-bottom: 8px;
+    border-radius: 4px;
+}
+
+.logo-fallback {
+    font-size: 24px;
+    margin-bottom: 8px;
+    display: block;
+}
+
+/* Make sure logo options accommodate images */
+.logo-option {
+    padding: 16px;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
 /* Responsive */
 @media (max-width: 1024px) {
   .customizer-wrapper {
@@ -483,3 +506,4 @@ body {
     height: 200px;
   }
 }
+
