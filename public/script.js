@@ -1,6 +1,9 @@
 class ClubCoastCustomizer {
   constructor() {
-    // All available logos (matching Figma data)
+    // JWT data from RepSpark (will be populated from URL params)
+    this.jwtData = null;
+    
+    // All available logos (your current working version)
     this.allLogos = [
       { id: '1',  name: 'Kiawah Island Golf Resort',      preview: './images/kiawah.png' },
       { id: '2',  name: 'Whistling Straits Golf Shop',    preview: './images/whistling-straits.png' },
@@ -23,7 +26,7 @@ class ClubCoastCustomizer {
     // Initially displayed logos (first 4)
     this.initialLogos = this.allLogos.slice(0, 4);
 
-    // Thread color options (matching Figma data)
+    // Thread color options
     this.threadColors = [
       { 
         id: 'club',
@@ -58,11 +61,61 @@ class ClubCoastCustomizer {
   }
 
   init() {
+    this.parseJWTFromURL();
     this.renderLogos();
     this.renderThreadColors();
     this.bindEvents();
     this.updateLogoOverlay();
     console.log('Club & Coast Customizer initialized');
+  }
+
+  parseJWTFromURL() {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
+      
+      if (token) {
+        // In production, you'd verify this JWT with RepSpark's public key
+        // For now, we'll decode it (assuming it's base64 encoded)
+        this.jwtData = JSON.parse(atob(token.split('.')[1]));
+        console.log('JWT Data received:', this.jwtData);
+        
+        // Update UI with product data from JWT
+        this.updateProductFromJWT();
+      } else {
+        console.log('No JWT token found, using demo data');
+        // Use demo data for testing
+        this.jwtData = {
+          productNumber: 'CC-POLO-001',
+          productName: 'Classic Performance Polo',
+          productImage: 'https://images.unsplash.com/photo-1581655353564-df123a1eb820?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080'
+        };
+      }
+    } catch (error) {
+      console.error('Error parsing JWT:', error);
+      // Fallback to demo data
+      this.jwtData = {
+        productNumber: 'CC-POLO-001',
+        productName: 'Classic Performance Polo',
+        productImage: 'https://images.unsplash.com/photo-1581655353564-df123a1eb820?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080'
+      };
+    }
+  }
+
+  updateProductFromJWT() {
+    if (this.jwtData) {
+      // Update product title
+      const titleElement = document.getElementById('product-title');
+      if (titleElement && this.jwtData.productName) {
+        titleElement.textContent = this.jwtData.productName;
+      }
+      
+      // Update product image
+      const imageElement = document.getElementById('product-image');
+      if (imageElement && this.jwtData.productImage) {
+        imageElement.src = this.jwtData.productImage;
+      }
+    }
   }
 
   renderLogos() {
@@ -180,18 +233,25 @@ class ClubCoastCustomizer {
       });
     });
 
-    // Quantity controls
-    document.getElementById('qty-minus').addEventListener('click', () => {
-      if (this.state.quantity > 1) {
-        this.state.quantity--;
-        this.updateQuantityDisplay();
-      }
-    });
+    // Quantity controls - check if elements exist
+    const qtyMinus = document.getElementById('qty-minus');
+    const qtyPlus = document.getElementById('qty-plus');
+    
+    if (qtyMinus) {
+      qtyMinus.addEventListener('click', () => {
+        if (this.state.quantity > 1) {
+          this.state.quantity--;
+          this.updateQuantityDisplay();
+        }
+      });
+    }
 
-    document.getElementById('qty-plus').addEventListener('click', () => {
-      this.state.quantity++;
-      this.updateQuantityDisplay();
-    });
+    if (qtyPlus) {
+      qtyPlus.addEventListener('click', () => {
+        this.state.quantity++;
+        this.updateQuantityDisplay();
+      });
+    }
 
     // Add to cart
     document.getElementById('add-to-cart').addEventListener('click', () => {
@@ -251,7 +311,10 @@ class ClubCoastCustomizer {
   }
 
   updateQuantityDisplay() {
-    document.getElementById('quantity').textContent = this.state.quantity;
+    const quantityDisplay = document.getElementById('quantity');
+    if (quantityDisplay) {
+      quantityDisplay.textContent = this.state.quantity;
+    }
   }
 
   addToCart() {
@@ -259,17 +322,28 @@ class ClubCoastCustomizer {
     const selectedThreadColor = this.threadColors.find(color => color.id === this.state.selectedThreadColor);
 
     const customizationData = {
-      product: 'Classic performance polo',
-      logo: selectedLogo,
-      placement: this.state.selectedPlacement,
-      threadColor: selectedThreadColor,
-      quantity: this.state.quantity,
+      productNumber: this.jwtData?.productNumber || 'CC-POLO-001',
+      customizations: {
+        logo: selectedLogo,
+        placement: this.state.selectedPlacement,
+        threadColor: selectedThreadColor,
+        quantity: this.state.quantity
+      },
       timestamp: new Date().toISOString()
     };
 
-    console.log('Adding to cart:', customizationData);
+    console.log('Sending customization data back to RepSpark:', customizationData);
 
-    alert(`Added to cart!\n\nLogo: ${selectedLogo.name}\nPlacement: ${this.state.selectedPlacement} chest\nThread Color: ${selectedThreadColor.name}\nQuantity: ${this.state.quantity}`);
+    // Send data back to RepSpark parent window
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        action: 'SAVE',
+        payload: customizationData
+      }, 'https://app.repspark.com');
+    } else {
+      // Demo mode - show alert
+      alert(`Added to cart!\n\nLogo: ${selectedLogo.name}\nPlacement: ${this.state.selectedPlacement} chest\nThread Color: ${selectedThreadColor.name}\nQuantity: ${this.state.quantity}`);
+    }
   }
 
   // Method to get current customization state (for RepSpark integration)
