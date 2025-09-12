@@ -1,15 +1,15 @@
-// middleware.js
+// middleware.js (MUST be at repo root)
 import { NextResponse } from "next/server";
 
+// Add CSP header to every response
 export function middleware() {
-  const res = NextResponse.next();
-  res.headers.set(
-    "Content-Security-Policy",
-    "frame-ancestors https://app.repspark.com"
-    // For local testing with a parent, you can use:
-    // "frame-ancestors https://app.repspark.com http://localhost:3000"
-  );
-  return res;
+  return NextResponse.next({
+    headers: {
+      "Content-Security-Policy": "frame-ancestors https://app.repspark.com"
+      // For local parent testing too, you could use:
+      // "Content-Security-Policy": "frame-ancestors https://app.repspark.com http://localhost:3000"
+    },
+  });
 }
 
 // Apply to all routes (including /index.html and static assets)
