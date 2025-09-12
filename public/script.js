@@ -1,6 +1,6 @@
 class ClubCoastCustomizer {
   constructor() {
-    // Product configuration for Club & Coast Seaside Performance Polos
+    // Product configuration - ADDED
     this.PRODUCT_CONFIG = {
       'CNC-P1000': {
         name: 'Seaside Performance Polo',
@@ -61,24 +61,24 @@ class ClubCoastCustomizer {
     // JWT data from RepSpark (will be populated from URL params)
     this.jwtData = null;
     
-    // All available logos
+    // All available logos (your current working version)
     this.allLogos = [
-      { id: '1',  name: 'Kiawah Island Golf Resort',      preview: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/kiawah.png' },
-      { id: '2',  name: 'Whistling Straits Golf Shop',    preview: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/whistling-straits.png' },
-      { id: '3',  name: 'Bandon Dunes Golf Resort',       preview: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/bandon-dunes.png' },
-      { id: '4',  name: 'Augusta National Golf Shop',     preview: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/augusta.png' },
-      { id: '5',  name: 'Pinehurst Resort',               preview: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/pinehurst.png' },
-      { id: '6',  name: 'Torrey Pines Golf Course',       preview: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/torrey-pines.png' },
-      { id: '7',  name: 'TPC Sawgrass',                   preview: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/tpc-sawgrass.png' },
-      { id: '8',  name: 'Cypress Point Club',             preview: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/cypress-point.png' },
-      { id: '9',  name: 'Ocean Reef Club',                preview: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/ocean-reef.png' },
-      { id: '10', name: 'Boca Raton Resort & Club',       preview: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/boca-raton.png' },
-      { id: '11', name: 'Austin Country Club',            preview: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/austin-cc.png' },
-      { id: '12', name: 'Newport Country Club',           preview: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/newport-cc.png' },
-      { id: '13', name: 'Barton Creek Resort',            preview: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/barton-creek.png' },
-      { id: '14', name: 'Desert Mountain Club',           preview: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/desert-mountain.png' },
-      { id: '15', name: 'Longboat Key Club',              preview: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/longboat-key.png' },
-      { id: '16', name: 'Palmetto Bluff Club Store',      preview: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/palmetto-bluff.png' },
+      { id: '1',  name: 'Kiawah Island Golf Resort',      preview: './images/kiawah.png' },
+      { id: '2',  name: 'Whistling Straits Golf Shop',    preview: './images/whistling-straits.png' },
+      { id: '3',  name: 'Bandon Dunes Golf Resort',       preview: './images/bandon-dunes.png' },
+      { id: '4',  name: 'Augusta National Golf Shop',     preview: './images/augusta.png' },
+      { id: '5',  name: 'Pinehurst Resort',               preview: './images/pinehurst.png' },
+      { id: '6',  name: 'Torrey Pines Golf Course',       preview: './images/torrey-pines.png' },
+      { id: '7',  name: 'TPC Sawgrass',                   preview: './images/tpc-sawgrass.png' },
+      { id: '8',  name: 'Cypress Point Club',             preview: './images/cypress-point.png' },
+      { id: '9',  name: 'Ocean Reef Club',                preview: './images/ocean-reef.png' },
+      { id: '10', name: 'Boca Raton Resort & Club',       preview: './images/boca-raton.png' },
+      { id: '11', name: 'Austin Country Club',            preview: './images/austin-cc.png' },
+      { id: '12', name: 'Newport Country Club',           preview: './images/newport-cc.png' },
+      { id: '13', name: 'Barton Creek Resort',            preview: './images/barton-creek.png' },
+      { id: '14', name: 'Desert Mountain Club',           preview: './images/desert-mountain.png' },
+      { id: '15', name: 'Longboat Key Club',              preview: './images/longboat-key.png' },
+      { id: '16', name: 'Palmetto Bluff Club Store',      preview: './images/palmetto-bluff.png' },
     ];
 
     // Initially displayed logos (first 4)
@@ -152,6 +152,7 @@ class ClubCoastCustomizer {
             this.updateProductFromJWT();
         } else {
             console.log('No JWT token found, using demo data');
+            // MODIFIED - use product config for demo
             this.jwtData = {
                 productNumber: 'CNC-P1000',
                 productName: 'Seaside Performance Polo - Navy Men\'s',
@@ -161,7 +162,7 @@ class ClubCoastCustomizer {
         }
     } catch (error) {
         console.error('Error parsing JWT:', error);
-        // Fallback to demo data
+        // MODIFIED - use product config for fallback
         this.jwtData = {
             productNumber: 'CNC-P1000',
             productName: 'Seaside Performance Polo - Navy Men\'s',
@@ -173,7 +174,7 @@ class ClubCoastCustomizer {
 
   updateProductFromJWT() {
     if (this.jwtData) {
-      // Extract product ID from JWT payload
+      // MODIFIED - check for product config first
       const productId = this.jwtData.productNumber || 
                        this.jwtData.productId || 
                        this.jwtData.product?.id ||
@@ -197,7 +198,7 @@ class ClubCoastCustomizer {
         
         console.log(`Product updated to: ${product.name} - ${product.color} ${product.gender}`);
       } else {
-        // Fallback to JWT data or default
+        // Original fallback logic
         const titleElement = document.getElementById('product-title');
         if (titleElement && this.jwtData.productName) {
           titleElement.textContent = this.jwtData.productName;
@@ -224,15 +225,16 @@ class ClubCoastCustomizer {
     this.updateSearchInfo(filteredLogos.length);
 
     logoGrid.innerHTML = filteredLogos.map(logo => `
-      <div class="logo-item ${this.state.selectedLogo === logo.id ? 'selected' : ''}"
-           data-logo="${logo.id}">
-        <img src="${logo.preview}" alt="${logo.name}" loading="lazy" />
+      <button class="logo-option ${this.state.selectedLogo === logo.id ? 'selected' : ''}"
+              data-logo="${logo.id}" type="button" aria-label="${logo.name}">
+        <img class="logo-preview-img" src="${logo.preview}" alt="${logo.name}" loading="lazy"
+             onerror="this.onerror=null; this.src='./images/fallback.png';">
         <span class="logo-name">${logo.name}</span>
-      </div>
+      </button>
     `).join('');
 
     // Add click handlers
-    logoGrid.querySelectorAll('.logo-item').forEach(option => {
+    logoGrid.querySelectorAll('.logo-option').forEach(option => {
       option.addEventListener('click', () => {
         const logoId = option.dataset.logo;
         this.selectLogo(logoId);
@@ -244,8 +246,8 @@ class ClubCoastCustomizer {
     const container = document.getElementById('thread-color-options');
     
     container.innerHTML = this.threadColors.map(colorOption => `
-      <div class="thread-color-option ${this.state.selectedThreadColor === colorOption.id ? 'selected' : ''}" 
-           data-color="${colorOption.id}">
+      <button class="thread-color-option ${this.state.selectedThreadColor === colorOption.id ? 'selected' : ''}" 
+              data-color="${colorOption.id}">
         <div class="thread-color-header">
           <div class="thread-color-info">
             <div class="thread-color-name">${colorOption.name}</div>
@@ -258,7 +260,7 @@ class ClubCoastCustomizer {
             `<div class="color-swatch" style="background-color: ${swatch};"></div>`
           ).join('')}
         </div>
-      </div>
+      </button>
     `).join('');
 
     // Add click handlers
@@ -325,7 +327,7 @@ class ClubCoastCustomizer {
       });
     });
 
-    // Quantity controls
+    // Quantity controls - check if elements exist
     const qtyMinus = document.getElementById('qty-minus');
     const qtyPlus = document.getElementById('qty-plus');
     
@@ -355,7 +357,7 @@ class ClubCoastCustomizer {
     this.state.selectedLogo = logoId;
 
     // Update logo selection visual state
-    document.querySelectorAll('.logo-item').forEach(option => {
+    document.querySelectorAll('.logo-option').forEach(option => {
       option.classList.toggle('selected', option.dataset.logo === logoId);
     });
 
@@ -414,7 +416,7 @@ class ClubCoastCustomizer {
     const selectedThreadColor = this.threadColors.find(color => color.id === this.state.selectedThreadColor);
 
     const customizationData = {
-      productNumber: this.jwtData?.productNumber || 'CNC-P1000',
+      productNumber: this.jwtData?.productNumber || 'CNC-P1000', // MODIFIED - better fallback
       customizations: {
         logo: selectedLogo,
         placement: this.state.selectedPlacement,
