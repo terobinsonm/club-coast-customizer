@@ -92,14 +92,21 @@ body {
   top: 80px;
   width: 48px;
   height: 48px;
-  background: rgba(48, 48, 48, 1);
-  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   font-size: 18px;
   transition: all 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.logo-overlay img {
+  width: 40px;
+  height: 30px;
+  object-fit: contain;
 }
 
 .logo-overlay.left {
@@ -181,8 +188,14 @@ body {
   overflow-y: auto;
 }
 
-.logo-option {
-  padding: 24px;
+/* Updated Logo Item Styles - matches JavaScript */
+.logo-item {
+  padding: 16px;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   border: 2px solid #e5e7eb;
   border-radius: 6px;
   text-align: center;
@@ -191,24 +204,28 @@ body {
   background: white;
 }
 
-.logo-option:hover {
+.logo-item:hover {
   border-color: #d1d5db;
 }
 
-.logo-option.selected {
+.logo-item.selected {
   border-color: rgba(48, 48, 48, 1);
   background: rgba(48, 48, 48, 0.05);
 }
 
-.logo-option .logo-preview {
-  font-size: 24px;
-  margin-bottom: 12px;
+.logo-item img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  margin-bottom: 8px;
+  border-radius: 4px;
   display: block;
 }
 
-.logo-option .logo-name {
+.logo-item .logo-name {
   font-size: 12px;
   color: #6b7280;
+  line-height: 1.3;
 }
 
 /* Search Info */
@@ -284,84 +301,30 @@ body {
   border-radius: 50%;
 }
 
-/* Thread Colors */
+/* Updated Thread Colors - matches JavaScript */
 .thread-color-options {
   display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.thread-color-option {
-  width: 100%;
-  padding: 16px;
-  border: 2px solid #e5e7eb;
-  border-radius: 6px;
-  text-align: left;
-  cursor: pointer;
-  transition: all 0.2s;
-  background: white;
-}
-
-.thread-color-option:hover {
-  border-color: #d1d5db;
-}
-
-.thread-color-option.selected {
-  border-color: rgba(48, 48, 48, 1);
-  background: rgba(48, 48, 48, 0.02);
-}
-
-.thread-color-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.thread-color-info .thread-color-name {
-  font-size: 14px;
-  color: #111827;
-  margin-bottom: 4px;
-}
-
-.thread-color-info .thread-color-desc {
-  font-size: 12px;
-  color: #6b7280;
-}
-
-.thread-color-indicator {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: rgba(48, 48, 48, 1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.thread-color-indicator.hidden {
-  display: none;
-}
-
-.thread-color-indicator::after {
-  content: '';
-  width: 8px;
-  height: 8px;
-  background: white;
-  border-radius: 50%;
-}
-
-.thread-color-swatches {
-  display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
-.color-swatch {
-  width: 24px;
-  height: 24px;
+.thread-color {
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  border: 1px solid #d1d5db;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.thread-color.selected {
+  border-color: rgba(48, 48, 48, 1);
+  box-shadow: 0 0 0 2px rgba(48, 48, 48, 0.1);
+}
+
+.thread-color:hover {
+  transform: scale(1.1);
 }
 
 /* Size Grid */
@@ -385,6 +348,11 @@ body {
 .size-option:hover {
   border-color: #d1d5db;
   background: #f9fafb;
+}
+
+.size-option.selected {
+  border-color: rgba(48, 48, 48, 1);
+  background: rgba(48, 48, 48, 0.05);
 }
 
 /* Quantity */
@@ -444,29 +412,6 @@ body {
   background: rgba(48, 48, 48, 0.9);
 }
 
-.logo-preview-img {
-    width: 48px;
-    height: 48px;
-    object-fit: contain;
-    margin-bottom: 8px;
-    border-radius: 4px;
-}
-
-.logo-fallback {
-    font-size: 24px;
-    margin-bottom: 8px;
-    display: block;
-}
-
-/* Make sure logo options accommodate images */
-.logo-option {
-    padding: 16px;
-    min-height: 100px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
 /* Responsive */
 @media (max-width: 1024px) {
   .customizer-wrapper {
@@ -505,36 +450,4 @@ body {
     width: 280px;
     height: 200px;
   }
-}
-
-/* Enhanced logo image styling */
-.logo-preview-img {
-    width: 48px;
-    height: 48px;
-    object-fit: contain;
-    margin-bottom: 8px;
-    border-radius: 4px;
-    display: block;
-}
-
-.logo-fallback {
-    font-size: 24px;
-    margin-bottom: 8px;
-    display: block;
-}
-
-/* Ensure logo options work well with images */
-.logo-option {
-    padding: 16px;
-    min-height: 100px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid #e5e7eb;
-    border-radius: 6px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    background: white;
 }
