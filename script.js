@@ -80,7 +80,7 @@ class ClubCoastCustomizer {
     logoGrid.innerHTML = filteredLogos.map(logo => `
       <button class="logo-option ${this.state.selectedLogo === logo.id ? 'selected' : ''}"
               data-logo="${logo.id}" type="button" aria-label="${logo.name}">
-        <img class="logo-preview" src="${logo.preview}" alt="${logo.name}" loading="lazy"
+        <img class="logo-preview-img" src="${logo.preview}" alt="${logo.name}" loading="lazy"
              onerror="this.onerror=null; this.src='./images/fallback.png';">
         <span class="logo-name">${logo.name}</span>
       </button>
@@ -240,7 +240,7 @@ class ClubCoastCustomizer {
         img.onerror = () => { img.remove(); overlay.textContent = selectedLogo.name; };
         overlay.appendChild(img);
       } else {
-        overlay.textContent = selectedLogo.preview; // fallback to text/emoji if ever used
+        overlay.textContent = selectedLogo.preview; // fallback
       }
 
       overlay.className = `logo-overlay ${this.state.selectedPlacement}`;
@@ -269,14 +269,7 @@ class ClubCoastCustomizer {
 
     console.log('Adding to cart:', customizationData);
 
-    // Temporary confirmation
     alert(`Added to cart!\n\nLogo: ${selectedLogo.name}\nPlacement: ${this.state.selectedPlacement} chest\nThread Color: ${selectedThreadColor.name}\nQuantity: ${this.state.quantity}`);
-
-    // For future RepSpark integration:
-    // window.parent.postMessage({
-    //   action: 'SAVE',
-    //   payload: 'jwt-token-with-customization-data'
-    // }, 'https://app.repspark.com');
   }
 
   // Method to get current customization state (for RepSpark integration)
