@@ -212,13 +212,64 @@ class ClubCoastCustomizer {
   }
 
   renderLogos() {
-    const logoGrid = document.getElementById('logo-grid');
-    const filteredLogos = this.getFilteredLogos();
+  const logoGrid = document.getElementById('logo-grid');
+  const filteredLogos = this.getFilteredLogos();
 
-    if (filteredLogos.length === 0) {
-      this.showNoResults();
-      return;
-    }
+  if (filteredLogos.length === 0) {
+    this.showNoResults();
+    return;
+  }
+
+  this.hideNoResults();
+  this.updateSearchInfo(filteredLogos.length);
+
+  logoGrid.innerHTML = filteredLogos.map(logo => `
+    <div class="logo-item ${this.state.selectedLogo === logo.id ? 'selected' : ''}"
+         data-logo="${logo.id}">
+      <img src="${logo.preview}" alt="${logo.name}" loading="lazy" />
+      <span class="logo-name">${logo.name}</span>
+    </div>
+  `).join('');
+
+  // Add click handlers
+  logoGrid.querySelectorAll('.logo-item').forEach(option => {
+    option.addEventListener('click', () => {
+      const logoId = option.dataset.logo;
+      this.selectLogo(logoId);
+    });
+  });
+}
+
+renderThreadColors() {
+  const container = document.getElementById('thread-color-options');
+  
+  container.innerHTML = this.threadColors.map(colorOption => `
+    <div class="thread-color-option ${this.state.selectedThreadColor === colorOption.id ? 'selected' : ''}" 
+         data-color="${colorOption.id}">
+      <div class="thread-color-header">
+        <div class="thread-color-info">
+          <div class="thread-color-name">${colorOption.name}</div>
+          <div class="thread-color-desc">${colorOption.description}</div>
+        </div>
+        <div class="thread-color-indicator ${this.state.selectedThreadColor === colorOption.id ? '' : 'hidden'}"></div>
+      </div>
+      <div class="thread-color-swatches">
+        ${colorOption.swatches.map(swatch => 
+          `<div class="color-swatch" style="background-color: ${swatch};"></div>`
+        ).join('')}
+      </div>
+    </div>
+  `).join('');
+
+  // Add click handlers
+  container.querySelectorAll('.thread-color-option').forEach(option => {
+    option.addEventListener('click', () => {
+      const colorId = option.dataset.color;
+      this.selectThreadColor(colorId);
+    });
+  });
+}
+  
 
     this.hideNoResults();
     this.updateSearchInfo(filteredLogos.length);
@@ -352,16 +403,16 @@ class ClubCoastCustomizer {
     });
   }
 
-  selectLogo(logoId) {
-    this.state.selectedLogo = logoId;
+selectLogo(logoId) {
+  this.state.selectedLogo = logoId;
 
-    // Update logo selection visual state
-    document.querySelectorAll('.logo-option').forEach(option => {
-      option.classList.toggle('selected', option.dataset.logo === logoId);
-    });
+  // Update logo selection visual state
+  document.querySelectorAll('.logo-item').forEach(option => {
+    option.classList.toggle('selected', option.dataset.logo === logoId);
+  });
 
-    this.updateLogoOverlay();
-  }
+  this.updateLogoOverlay();
+}
 
   selectThreadColor(colorId) {
     this.state.selectedThreadColor = colorId;
@@ -457,3 +508,4 @@ class ClubCoastCustomizer {
 document.addEventListener('DOMContentLoaded', () => {
   new ClubCoastCustomizer();
 });
+
