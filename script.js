@@ -1,24 +1,24 @@
 class ClubCoastCustomizer {
     constructor() {
         // All available logos (matching Figma data)
-        this.allLogos = [
-            { id: '1', name: 'Company logo A', preview: '🏢' },
-            { id: '2', name: 'Company logo B', preview: '⭐' },
-            { id: '3', name: 'Company logo C', preview: '🔥' },
-            { id: '4', name: 'Company logo D', preview: '💎' },
-            { id: '5', name: 'Sports team logo', preview: '⚽' },
-            { id: '6', name: 'Technology brand', preview: '💻' },
-            { id: '7', name: 'Healthcare logo', preview: '🏥' },
-            { id: '8', name: 'Education institute', preview: '🎓' },
-            { id: '9', name: 'Automotive brand', preview: '🚗' },
-            { id: '10', name: 'Finance company', preview: '💰' },
-            { id: '11', name: 'Restaurant chain', preview: '🍽️' },
-            { id: '12', name: 'Retail brand', preview: '🛍️' },
-            { id: '13', name: 'Construction corp', preview: '🏗️' },
-            { id: '14', name: 'Energy company', preview: '⚡' },
-            { id: '15', name: 'Travel agency', preview: '✈️' },
-            { id: '16', name: 'Music label', preview: '🎵' },
-        ];
+this.allLogos = [
+    { id: '1', name: 'Kiawah Island Golf Resort', preview: './images/kiawah.png' },
+    { id: '2', name: 'Whistling Straits Golf Shop', preview: './images/whistling-straits.png' },
+    { id: '3', name: 'Bandon Dunes Golf Resort', preview: './images/bandon-dunes.png' },
+    { id: '4', name: 'Augusta National Golf Shop', preview: './images/augusta.png' },
+    { id: '5', name: 'Pinehurst Resort', preview: './images/pinehurst.png' },
+    { id: '6', name: 'Torrey Pines Golf Course', preview: './images/torrey-pines.png' },
+    { id: '7', name: 'TPC Sawgrass', preview: './images/tpc-sawgrass.png' },
+    { id: '8', name: 'Cypress Point Club', preview: './images/cypress-point.png' },
+    { id: '9', name: 'Ocean Reef Club', preview: './images/ocean-reef.png' },
+    { id: '10', name: 'Boca Raton Resort & Club', preview: './images/boca-raton.png' },
+    { id: '11', name: 'Austin Country Club', preview: './images/austin-cc.png' },
+    { id: '12', name: 'Newport Country Club', preview: './images/newport-cc.png' },
+    { id: '13', name: 'Barton Creek Resort', preview: './images/barton-creek.png' },
+    { id: '14', name: 'Desert Mountain Club', preview: './images/desert-mountain.png' },
+    { id: '15', name: 'Longboat Key Club', preview: './images/longboat-key.png' },
+    { id: '16', name: 'Palmetto Bluff Club Store', preview: './images/palmetto-bluff.png' },
+];
 
         // Initially displayed logos (first 4)
         this.initialLogos = this.allLogos.slice(0, 4);
@@ -283,3 +283,4 @@ class ClubCoastCustomizer {
 document.addEventListener('DOMContentLoaded', () => {
     new ClubCoastCustomizer();
 });
+
