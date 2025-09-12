@@ -1,3 +1,98 @@
+// Product configuration for Club & Coast Seaside Performance Polos
+const PRODUCT_CONFIG = {
+    'CNC-P1000': {
+        name: 'Seaside Performance Polo',
+        description: 'Premium performance polo with UV protection - Navy Men\'s',
+        color: 'Navy',
+        gender: 'Men\'s',
+        colorCode: 'NAVM',
+        image: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/products/CNCP1000.jpg',
+        alt: 'Navy men\'s performance polo'
+    },
+    'CNC-P1001': {
+        name: 'Seaside Performance Polo',
+        description: 'Premium performance polo with UV protection - Navy Women\'s',
+        color: 'Navy',
+        gender: 'Women\'s',
+        colorCode: 'NAVF',
+        image: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/products/CNCP1001.jpg',
+        alt: 'Navy women\'s performance polo'
+    },
+    'CNC-P1002': {
+        name: 'Seaside Performance Polo',
+        description: 'Premium performance polo with UV protection - White Men\'s',
+        color: 'White',
+        gender: 'Men\'s',
+        colorCode: 'WHTM',
+        image: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/products/CNCP1002.jpg',
+        alt: 'White men\'s performance polo'
+    },
+    'CNC-P1003': {
+        name: 'Seaside Performance Polo',
+        description: 'Premium performance polo with UV protection - White Women\'s',
+        color: 'White',
+        gender: 'Women\'s',
+        colorCode: 'WHTF',
+        image: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/products/CNCP1003.jpg',
+        alt: 'White women\'s performance polo'
+    },
+    'CNC-P1004': {
+        name: 'Seaside Performance Polo',
+        description: 'Premium performance polo with UV protection - Blue Men\'s',
+        color: 'Blue',
+        gender: 'Men\'s',
+        colorCode: 'BLUM',
+        image: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/products/CNCP1004.jpg',
+        alt: 'Blue men\'s performance polo'
+    },
+    'CNC-P1005': {
+        name: 'Seaside Performance Polo',
+        description: 'Premium performance polo with UV protection - Blue Women\'s',
+        color: 'Blue',
+        gender: 'Women\'s',
+        colorCode: 'BLUF',
+        image: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/products/CNCP1005.jpg',
+        alt: 'Blue women\'s performance polo'
+    }
+};
+
+// Function to update product display based on RepSpark data
+function updateProductDisplay(productId) {
+    const product = PRODUCT_CONFIG[productId];
+    
+    if (!product) {
+        console.warn('Product not found:', productId);
+        return;
+    }
+    
+    // Update product image and title
+    const productImage = document.getElementById('product-image');
+    const productTitle = document.getElementById('product-title');
+    
+    if (productImage) {
+        productImage.src = product.image;
+        productImage.alt = product.alt;
+    }
+    
+    if (productTitle) {
+        productTitle.textContent = `${product.name} - ${product.color} ${product.gender}`;
+    }
+    
+    console.log(`Product updated to: ${product.name} - ${product.color} ${product.gender}`);
+}
+
+// Initialize product from URL parameter (for testing)
+function initializeFromURL() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('productId') || urlParams.get('product');
+    
+    if (productId && PRODUCT_CONFIG[productId]) {
+        updateProductDisplay(productId);
+    } else {
+        // Default to first product for testing
+        updateProductDisplay('CNC-P1000');
+    }
+}
 class ClubCoastCustomizer {
   constructor() {
     // JWT data from RepSpark (will be populated from URL params)
@@ -373,3 +468,4 @@ class ClubCoastCustomizer {
 document.addEventListener('DOMContentLoaded', () => {
   new ClubCoastCustomizer();
 });
+
