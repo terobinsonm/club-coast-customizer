@@ -224,17 +224,32 @@ this.allLogos = [
         });
     }
 
-    updateLogoOverlay() {
-        const overlay = document.getElementById('logo-overlay');
-        const selectedLogo = this.allLogos.find(logo => logo.id === this.state.selectedLogo);
+updateLogoOverlay() {
+    const overlay = document.getElementById('logo-overlay');
+    const selectedLogo = this.allLogos.find(logo => logo.id === this.state.selectedLogo);
+    
+    if (selectedLogo) {
+        // Clear existing content
+        overlay.innerHTML = '';
         
-        if (selectedLogo) {
-            overlay.textContent = selectedLogo.preview;
-            overlay.className = `logo-overlay ${this.state.selectedPlacement}`;
+        if (selectedLogo.preview.includes('.png') || selectedLogo.preview.includes('.jpg') || selectedLogo.preview.includes('.svg')) {
+            // Use actual logo image on the product
+            const img = document.createElement('img');
+            img.src = selectedLogo.preview;
+            img.style.width = '32px';
+            img.style.height = '32px';
+            img.style.objectFit = 'contain';
+            overlay.appendChild(img);
         } else {
-            overlay.classList.add('hidden');
+            // Fallback to emoji/text
+            overlay.textContent = selectedLogo.preview;
         }
+        
+        overlay.className = `logo-overlay ${this.state.selectedPlacement}`;
+    } else {
+        overlay.classList.add('hidden');
     }
+}
 
     updateQuantityDisplay() {
         document.getElementById('quantity').textContent = this.state.quantity;
@@ -283,4 +298,5 @@ this.allLogos = [
 document.addEventListener('DOMContentLoaded', () => {
     new ClubCoastCustomizer();
 });
+
 
