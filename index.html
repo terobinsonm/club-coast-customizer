@@ -10,43 +10,61 @@
 <body>
     <div class="customizer-container">
         <header>
-            <h1>Customize Your Club & Coast Product</h1>
+            <h1>Classic performance polo</h1>
         </header>
         
         <div class="product-preview">
-            <img id="product-image" src="https://via.placeholder.com/400x300/2c3e50/white?text=Club+%26+Coast+Polo" alt="Product Preview" />
+            <img id="product-image" src="https://via.placeholder.com/280x200/f8f9fa/666?text=White+Polo+Shirt" alt="Product Preview" />
         </div>
         
-        <div class="customization-options">
-            <div class="option-group">
-                <label for="custom-text">Add Personalization</label>
-                <input type="text" id="custom-text" placeholder="Enter initials or text (optional)" maxlength="20" />
+        <div class="customization-section">
+            <div class="logo-section">
+                <h3>Select logo</h3>
+                <div class="logo-grid">
+                    <div class="logo-option" data-logo="st-andrews">
+                        <img src="https://via.placeholder.com/60x60/e0e0e0/666?text=Logo+1" alt="St. Andrews Golf Club" />
+                    </div>
+                    <div class="logo-option" data-logo="yacht-club">
+                        <img src="https://via.placeholder.com/60x60/e0e0e0/666?text=Logo+2" alt="Harbor Yacht Club" />
+                    </div>
+                    <div class="logo-option" data-logo="country-club">
+                        <img src="https://via.placeholder.com/60x60/e0e0e0/666?text=Logo+3" alt="Pinehurst Country Club" />
+                    </div>
+                    <div class="logo-option" data-logo="resort">
+                        <img src="https://via.placeholder.com/60x60/e0e0e0/666?text=Logo+4" alt="Resort Logo" />
+                    </div>
+                </div>
+                <div class="search-container">
+                    <input type="text" id="logo-search" placeholder="Search logos" />
+                </div>
             </div>
-            
-            <div class="option-group">
-                <label for="placement">Choose Placement</label>
-                <select id="placement">
-                    <option value="left-chest">Left Chest</option>
-                    <option value="right-chest">Right Chest</option>
-                    <option value="sleeve">Sleeve</option>
-                    <option value="back">Back</option>
-                </select>
+
+            <div class="placement-section">
+                <h3>Placement</h3>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="placement" value="left-chest" checked />
+                        <span class="radio-label">Left chest</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="placement" value="right-chest" />
+                        <span class="radio-label">Right chest</span>
+                    </label>
+                </div>
             </div>
-            
-            <div class="option-group">
-                <label for="thread-color">Thread Color</label>
-                <select id="thread-color">
-                    <option value="white">White</option>
-                    <option value="navy">Navy</option>
-                    <option value="gold">Gold</option>
-                    <option value="silver">Silver</option>
-                </select>
+
+            <div class="color-section">
+                <h3>Thread color</h3>
+                <div class="color-options">
+                    <button class="color-option active" data-color="club">Club colors</button>
+                    <button class="color-option" data-color="coordinated">Color coordinated</button>
+                    <button class="color-option" data-color="tonal">Tonal</button>
+                </div>
             </div>
         </div>
         
         <div class="actions">
-            <button id="cancel-btn" class="btn-secondary">Cancel</button>
-            <button id="save-btn" class="btn-primary">Add to Cart</button>
+            <button id="add-to-cart-btn" class="btn-primary">Add to cart</button>
         </div>
     </div>
     
