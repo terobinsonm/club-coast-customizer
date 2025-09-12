@@ -69,7 +69,7 @@ class ClubCoastCustomizer {
     console.log('Club & Coast Customizer initialized');
   }
 
-parseJWTFromURL() {
+  parseJWTFromURL() {
     try {
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get('token');
@@ -108,17 +108,6 @@ parseJWTFromURL() {
             productName: 'Classic Performance Polo',
             productImage: 'https://images.unsplash.com/photo-1581655353564-df123a1eb820?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080'
         };
-    }
-}
-      }
-    } catch (error) {
-      console.error('Error parsing JWT:', error);
-      // Fallback to demo data
-      this.jwtData = {
-        productNumber: 'CC-POLO-001',
-        productName: 'Classic Performance Polo',
-        productImage: 'https://images.unsplash.com/photo-1581655353564-df123a1eb820?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080'
-      };
     }
   }
 
@@ -384,4 +373,3 @@ parseJWTFromURL() {
 document.addEventListener('DOMContentLoaded', () => {
   new ClubCoastCustomizer();
 });
-
