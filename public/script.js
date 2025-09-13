@@ -148,8 +148,15 @@ class ClubCoastCustomizer {
       cursor: productImage.style.cursor || 'default'
     };
 
-    // Mouse enter - start zoom
-    productImage.addEventListener('mouseenter', (e) => {
+    // Create a larger hover zone that includes both image and overlay
+    const createHoverZone = () => {
+      const logoOverlay = document.getElementById('logo-overlay');
+      return logoOverlay && !logoOverlay.classList.contains('hidden') ? 
+        [productImage, logoOverlay] : [productImage];
+    };
+
+    // Mouse enter - start zoom (works for both image and overlay)
+    const handleMouseEnter = (e) => {
       if (!this.isZoomed) {
         this.isZoomed = true;
         productImage.style.transition = 'transform 0.3s ease-out';
@@ -157,18 +164,19 @@ class ClubCoastCustomizer {
         productImage.style.cursor = 'zoom-out';
         productImage.style.zIndex = '100';
         
-        // Also zoom the logo overlay if visible
+        // Scale logo overlay but keep it in fixed position relative to garment
         const logoOverlay = document.getElementById('logo-overlay');
         if (logoOverlay && !logoOverlay.classList.contains('hidden')) {
           logoOverlay.style.transition = 'transform 0.3s ease-out';
           logoOverlay.style.transform = 'scale(2)';
           logoOverlay.style.zIndex = '101';
+          logoOverlay.style.pointerEvents = 'none'; // Allow mouse events to pass through
         }
       }
-    });
+    };
 
-    // Mouse move - follow cursor for pan effect
-    productImage.addEventListener('mousemove', (e) => {
+    // Mouse move - follow cursor for pan effect (only on container)
+    const handleMouseMove = (e) => {
       if (this.isZoomed) {
         const rect = imageContainer.getBoundingClientRect();
         const x = e.clientX - rect.left;
@@ -183,30 +191,49 @@ class ClubCoastCustomizer {
         
         productImage.style.transform = `scale(2) translate(${moveX}px, ${moveY}px)`;
         
-        // Move logo overlay with image
+        // Keep logo overlay in the same relative position - it scales but doesn't pan
         const logoOverlay = document.getElementById('logo-overlay');
         if (logoOverlay && !logoOverlay.classList.contains('hidden')) {
-          logoOverlay.style.transform = `scale(2) translate(${moveX}px, ${moveY}px)`;
+          // Logo stays in fixed position relative to the garment, only scales
+          logoOverlay.style.transform = `scale(2)`;
         }
       }
-    });
+    };
 
     // Mouse leave - reset zoom
-    productImage.addEventListener('mouseleave', () => {
-      if (this.isZoomed) {
-        this.isZoomed = false;
-        productImage.style.transform = originalStyles.transform;
-        productImage.style.cursor = 'zoom-in';
-        productImage.style.zIndex = '1';
-        
-        // Reset logo overlay
-        const logoOverlay = document.getElementById('logo-overlay');
-        if (logoOverlay) {
-          logoOverlay.style.transform = '';
-          logoOverlay.style.zIndex = '';
+    const handleMouseLeave = (e) => {
+      // Check if mouse is leaving the entire container area
+      const rect = imageContainer.getBoundingClientRect();
+      const x = e.clientX;
+      const y = e.clientY;
+      
+      // Only reset if mouse is actually outside the container
+      if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+        if (this.isZoomed) {
+          this.isZoomed = false;
+          productImage.style.transform = originalStyles.transform;
+          productImage.style.cursor = 'zoom-in';
+          productImage.style.zIndex = '1';
+          
+          // Reset logo overlay
+          const logoOverlay = document.getElementById('logo-overlay');
+          if (logoOverlay) {
+            logoOverlay.style.transform = '';
+            logoOverlay.style.zIndex = '';
+            logoOverlay.style.pointerEvents = 'auto'; // Restore pointer events
+          }
         }
       }
-    });
+    };
+
+    // Add event listeners to image
+    productImage.addEventListener('mouseenter', handleMouseEnter);
+    productImage.addEventListener('mousemove', handleMouseMove);
+    productImage.addEventListener('mouseleave', handleMouseLeave);
+
+    // Also add listeners to the container to handle overlay interactions
+    imageContainer.addEventListener('mouseleave', handleMouseLeave);
+    imageContainer.addEventListener('mousemove', handleMouseMove);
 
     // Set initial cursor
     productImage.style.cursor = 'zoom-in';
