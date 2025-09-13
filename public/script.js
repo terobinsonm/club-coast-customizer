@@ -498,21 +498,23 @@ class ClubCoastCustomizer {
   setupHoverZoom(productImage) {
     const container = productImage.parentElement;
     let zoomLens = null;
-    const zoomFactor = 2.5; // How much to magnify
+    const zoomFactor = 2;
 
     const createZoomLens = () => {
       zoomLens = document.createElement('div');
       zoomLens.style.cssText = `
         position: absolute;
-        width: 150px;
-        height: 150px;
-        border: 3px solid #ffffff;
+        width: 120px;
+        height: 120px;
+        border: 2px solid #ffffff;
         border-radius: 50%;
         pointer-events: none;
         z-index: 1000;
+        background-size: ${productImage.width * zoomFactor}px ${productImage.height * zoomFactor}px;
         background-repeat: no-repeat;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
         display: none;
+        background-image: url(${productImage.src});
       `;
       container.appendChild(zoomLens);
     };
@@ -535,85 +537,16 @@ class ClubCoastCustomizer {
       const lensX = e.clientX - containerRect.left - zoomLens.offsetWidth / 2;
       const lensY = e.clientY - containerRect.top - zoomLens.offsetHeight / 2;
       
-      // Update lens position and background
       zoomLens.style.left = `${lensX}px`;
       zoomLens.style.top = `${lensY}px`;
-      
-      // Create a canvas to combine the product image and logo overlay
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      
-      // Set canvas size to match the product image
-      canvas.width = productImage.naturalWidth || productImage.width;
-      canvas.height = productImage.naturalHeight || productImage.height;
-      
-      // Create a new image to ensure it's loaded
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      
-      img.onload = () => {
-        // Draw the product image
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        
-        // Draw the logo overlay if it exists and is visible
-        const logoOverlay = document.getElementById('logo-overlay');
-        const logoImg = logoOverlay?.querySelector('img');
-        
-        if (logoImg && !logoOverlay.classList.contains('hidden')) {
-          const logoCanvas = new Image();
-          logoCanvas.crossOrigin = 'anonymous';
-          
-          logoCanvas.onload = () => {
-            // Calculate logo position based on placement
-            let logoX, logoY;
-            const logoWidth = 40 * (canvas.width / productImage.width);
-            const logoHeight = 30 * (canvas.height / productImage.height);
-            
-            if (this.state.selectedPlacement === 'left') {
-              logoX = canvas.width * 0.15;
-              logoY = canvas.height * 0.25;
-            } else if (this.state.selectedPlacement === 'right') {
-              logoX = canvas.width * 0.85 - logoWidth;
-              logoY = canvas.height * 0.25;
-            } else { // center
-              logoX = canvas.width * 0.5 - logoWidth / 2;
-              logoY = canvas.height * 0.3;
-            }
-            
-            // Apply thread color filter if needed
-            const selectedThreadColor = this.threadColors.find(color => color.id === this.state.selectedThreadColor);
-            if (selectedThreadColor && selectedThreadColor.logoStyle.filter !== 'none') {
-              ctx.filter = selectedThreadColor.logoStyle.filter;
-            }
-            
-            ctx.drawImage(logoCanvas, logoX, logoY, logoWidth, logoHeight);
-            ctx.filter = 'none'; // Reset filter
-            
-            // Convert canvas to data URL and use as background
-            const compositeDataUrl = canvas.toDataURL();
-            zoomLens.style.backgroundImage = `url(${compositeDataUrl})`;
-            zoomLens.style.backgroundSize = `${canvas.width * zoomFactor}px ${canvas.height * zoomFactor}px`;
-            zoomLens.style.backgroundPosition = `${bgX}px ${bgY}px`;
-          };
-          
-          logoCanvas.src = logoImg.src;
-        } else {
-          // No logo, just use the product image
-          const dataUrl = canvas.toDataURL();
-          zoomLens.style.backgroundImage = `url(${dataUrl})`;
-          zoomLens.style.backgroundSize = `${canvas.width * zoomFactor}px ${canvas.height * zoomFactor}px`;
-          zoomLens.style.backgroundPosition = `${bgX}px ${bgY}px`;
-        }
-      };
-      
-      img.src = productImage.src;
+      zoomLens.style.backgroundPosition = `${bgX}px ${bgY}px`;
     };
 
     // Event listeners
     productImage.addEventListener('mouseenter', () => {
       if (!zoomLens) createZoomLens();
       zoomLens.style.display = 'block';
-      productImage.style.cursor = 'none'; // Hide cursor over image
+      productImage.style.cursor = 'crosshair';
     });
 
     productImage.addEventListener('mousemove', updateZoomLens);
