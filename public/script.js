@@ -75,41 +75,36 @@ class ClubCoastCustomizer {
     // Initially displayed logos (first 4)
     this.initialLogos = this.allLogos.slice(0, 4);
 
-  this.threadColors = [
-  { 
-    id: 'club',
-    name: 'Club colors',
-    description: 'Brand-specific thread colors',
-    swatches: ['#1f2937', '#dc2626', '#2563eb', '#059669'],
-    logoStyle: {
-      filter: 'none',
-      border: '2px solid #1f2937',
-      backgroundColor: 'rgba(31, 41, 55, 0.1)'
-    }
-  },
-  { 
-    id: 'coordinated',
-    name: 'Coordinated',
-    description: 'Complementary color palette',
-    swatches: ['#4f46e5', '#06b6d4', '#10b981', '#f59e0b'],
-    logoStyle: {
-      filter: 'hue-rotate(45deg) saturate(1.2)',
-      border: '2px solid #4f46e5',
-      backgroundColor: 'rgba(79, 70, 229, 0.1)'
-    }
-  },
-  { 
-    id: 'tonal',
-    name: 'Tonal',
-    description: 'Matching shirt color tones',
-    swatches: ['#f9fafb', '#e5e7eb', '#9ca3af', '#6b7280'],
-    logoStyle: {
-      filter: 'grayscale(0.8) contrast(1.1)',
-      border: '2px solid #9ca3af',
-      backgroundColor: 'rgba(156, 163, 175, 0.1)'
-    }
-  },
-];
+    // Updated thread colors with dynamic color coordination
+    this.threadColors = [
+      { 
+        id: 'club',
+        name: 'Club colors',
+        description: 'Brand-specific thread colors',
+        swatches: ['#1f2937', '#dc2626', '#2563eb', '#059669'],
+        logoStyle: {
+          filter: 'none'
+        }
+      },
+      { 
+        id: 'coordinated',
+        name: 'Coordinated',
+        description: 'Complementary color palette',
+        swatches: ['#4f46e5', '#06b6d4', '#10b981', '#f59e0b'], // Will be updated dynamically
+        logoStyle: {
+          filter: 'hue-rotate(45deg) saturate(1.2)'
+        }
+      },
+      { 
+        id: 'tonal',
+        name: 'Tonal',
+        description: 'Matching shirt color tones',
+        swatches: ['#f9fafb', '#e5e7eb', '#9ca3af', '#6b7280'],
+        logoStyle: {
+          filter: 'grayscale(0.8) contrast(1.1)'
+        }
+      },
+    ];
 
     // Current state
     this.state = {
@@ -175,6 +170,18 @@ class ClubCoastCustomizer {
     }
   }
 
+  // Method to get color-coordinated palette based on product color
+  getCoordinatedColors(productColor) {
+    const colorPalettes = {
+      'Navy': ['#1e3a8a', '#3b82f6', '#60a5fa', '#93c5fd'], // Navy blues
+      'Blue': ['#1e40af', '#2563eb', '#3b82f6', '#60a5fa'], // Bright blues  
+      'White': ['#374151', '#6b7280', '#9ca3af', '#d1d5db']  // Grays for white shirts
+    };
+    
+    return colorPalettes[productColor] || ['#4f46e5', '#06b6d4', '#10b981', '#f59e0b'];
+  }
+
+  // Updated updateProductFromJWT to update coordinated colors
   updateProductFromJWT() {
     if (this.jwtData) {
       // Extract product ID from JWT payload
@@ -185,6 +192,12 @@ class ClubCoastCustomizer {
 
       if (productId && this.PRODUCT_CONFIG[productId]) {
         const product = this.PRODUCT_CONFIG[productId];
+        
+        // Update coordinated thread color swatches based on product color
+        const coordinatedOption = this.threadColors.find(color => color.id === 'coordinated');
+        if (coordinatedOption) {
+          coordinatedOption.swatches = this.getCoordinatedColors(product.color);
+        }
         
         // Update product title
         const titleElement = document.getElementById('product-title');
@@ -198,6 +211,9 @@ class ClubCoastCustomizer {
           imageElement.src = product.image;
           imageElement.alt = product.alt;
         }
+        
+        // Re-render thread colors to show updated swatches
+        this.renderThreadColors();
         
         console.log(`Product updated to: ${product.name} - ${product.color} ${product.gender}`);
       } else {
@@ -347,108 +363,95 @@ class ClubCoastCustomizer {
     this.updateLogoOverlay();
   }
 
-// Updated selectThreadColor method to trigger logo update
-// Fixed selectThreadColor method
-selectThreadColor(colorId) {
-  this.state.selectedThreadColor = colorId;
+  // Fixed selectThreadColor method
+  selectThreadColor(colorId) {
+    this.state.selectedThreadColor = colorId;
 
-  // Update thread color selection visual state
-  document.querySelectorAll('.thread-color-option').forEach(option => {
-    const isSelected = option.dataset.color === colorId;
-    option.classList.toggle('selected', isSelected);
+    // Update thread color selection visual state
+    document.querySelectorAll('.thread-color-option').forEach(option => {
+      const isSelected = option.dataset.color === colorId;
+      option.classList.toggle('selected', isSelected);
 
-    const indicator = option.querySelector('.thread-color-indicator');
-    indicator.classList.toggle('hidden', !isSelected);
-  });
+      const indicator = option.querySelector('.thread-color-indicator');
+      indicator.classList.toggle('hidden', !isSelected);
+    });
 
-  // Update logo overlay to reflect new thread color
-  this.updateLogoOverlay();
-}
+    // Update logo overlay to reflect new thread color
+    this.updateLogoOverlay();
+  }
 
-// Updated updateLogoOverlay method (moved outside and corrected)
-updateLogoOverlay() {
-  const overlay = document.getElementById('logo-overlay');
-  const selectedLogo = this.allLogos.find(logo => logo.id === this.state.selectedLogo);
-  const selectedThreadColor = this.threadColors.find(color => color.id === this.state.selectedThreadColor);
+  // Updated updateLogoOverlay method - removed borders and backgrounds
+  updateLogoOverlay() {
+    const overlay = document.getElementById('logo-overlay');
+    const selectedLogo = this.allLogos.find(logo => logo.id === this.state.selectedLogo);
+    const selectedThreadColor = this.threadColors.find(color => color.id === this.state.selectedThreadColor);
 
-  if (selectedLogo) {
-    overlay.innerHTML = '';
+    if (selectedLogo) {
+      overlay.innerHTML = '';
 
-    if (/\.(png|jpg|jpeg|svg)$/i.test(selectedLogo.preview)) {
-      const img = document.createElement('img');
-      img.src = selectedLogo.preview;
-      img.alt = selectedLogo.name;
-      img.style.width = '40px';
-      img.style.height = '30px';
-      img.style.objectFit = 'contain';
-      
-      // Apply thread color styling
-      if (selectedThreadColor && selectedThreadColor.logoStyle) {
-        img.style.filter = selectedThreadColor.logoStyle.filter;
-        overlay.style.border = selectedThreadColor.logoStyle.border;
-        overlay.style.backgroundColor = selectedThreadColor.logoStyle.backgroundColor;
-        overlay.style.borderRadius = '8px';
-        overlay.style.padding = '4px';
-      } else {
-        // Reset to default styling
-        img.style.filter = 'none';
+      if (/\.(png|jpg|jpeg|svg)$/i.test(selectedLogo.preview)) {
+        const img = document.createElement('img');
+        img.src = selectedLogo.preview;
+        img.alt = selectedLogo.name;
+        img.style.width = '40px';
+        img.style.height = '30px';
+        img.style.objectFit = 'contain';
+        
+        // Apply only filter effects - no borders or backgrounds
+        if (selectedThreadColor && selectedThreadColor.logoStyle) {
+          img.style.filter = selectedThreadColor.logoStyle.filter;
+        } else {
+          img.style.filter = 'none';
+        }
+        
+        // Reset overlay styling to transparent
         overlay.style.border = 'none';
         overlay.style.backgroundColor = 'transparent';
         overlay.style.padding = '0';
+        
+        img.onerror = () => { 
+          img.remove(); 
+          overlay.textContent = selectedLogo.name; 
+        };
+        overlay.appendChild(img);
+      } else {
+        overlay.textContent = selectedLogo.preview;
       }
-      
-      img.onerror = () => { 
-        img.remove(); 
-        overlay.textContent = selectedLogo.name; 
-      };
-      overlay.appendChild(img);
+
+      overlay.className = `logo-overlay ${this.state.selectedPlacement}`;
+      overlay.classList.remove('hidden');
     } else {
-      overlay.textContent = selectedLogo.preview;
-    }
-
-    overlay.className = `logo-overlay ${this.state.selectedPlacement}`;
-    overlay.classList.remove('hidden');
-  } else {
-    overlay.classList.add('hidden');
-  }
-}
-
-
-  updateQuantityDisplay() {
-    const quantityDisplay = document.getElementById('quantity');
-    if (quantityDisplay) {
-      quantityDisplay.textContent = this.state.quantity;
+      overlay.classList.add('hidden');
     }
   }
 
-addToCart() {
-  const selectedLogo = this.allLogos.find(logo => logo.id === this.state.selectedLogo);
-  const selectedThreadColor = this.threadColors.find(color => color.id === this.state.selectedThreadColor);
+  addToCart() {
+    const selectedLogo = this.allLogos.find(logo => logo.id === this.state.selectedLogo);
+    const selectedThreadColor = this.threadColors.find(color => color.id === this.state.selectedThreadColor);
 
-  const customizationData = {
-    productNumber: this.jwtData?.productNumber || 'CNC-P1000',
-    customizations: {
-      logo: selectedLogo,
-      placement: this.state.selectedPlacement,
-      threadColor: selectedThreadColor
-      // Removed quantity since it's no longer needed
-    },
-    timestamp: new Date().toISOString()
-  };
+    const customizationData = {
+      productNumber: this.jwtData?.productNumber || 'CNC-P1000',
+      customizations: {
+        logo: selectedLogo,
+        placement: this.state.selectedPlacement,
+        threadColor: selectedThreadColor
+      },
+      timestamp: new Date().toISOString()
+    };
 
-  console.log('Sending customization data back to RepSpark:', customizationData);
+    console.log('Sending customization data back to RepSpark:', customizationData);
 
-  // Send data back to RepSpark parent window
-  if (window.parent && window.parent !== window) {
-    window.parent.postMessage({
-      action: 'SAVE',
-      payload: customizationData
-    }, 'https://app.repspark.com');
-  } else {
-    // Demo mode - show alert (removed quantity from alert)
-    alert(`Added to cart!\n\nLogo: ${selectedLogo.name}\nPlacement: ${this.state.selectedPlacement} chest\nThread Color: ${selectedThreadColor.name}`);
+    // Send data back to RepSpark parent window
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        action: 'SAVE',
+        payload: customizationData
+      }, 'https://app.repspark.com');
+    } else {
+      // Demo mode - show alert (removed quantity from alert)
+      alert(`Added to cart!\n\nLogo: ${selectedLogo.name}\nPlacement: ${this.state.selectedPlacement} chest\nThread Color: ${selectedThreadColor.name}`);
+    }
   }
-}
 
   // Method to get current customization state (for RepSpark integration)
   getCustomizationState() {
@@ -458,8 +461,7 @@ addToCart() {
     return {
       selectedLogo,
       placement: this.state.selectedPlacement,
-      threadColor: selectedThreadColor,
-      quantity: this.state.quantity
+      threadColor: selectedThreadColor
     };
   }
 }
@@ -468,8 +470,3 @@ addToCart() {
 document.addEventListener('DOMContentLoaded', () => {
   new ClubCoastCustomizer();
 });
-
-
-
-
-
