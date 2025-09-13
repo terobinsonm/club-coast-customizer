@@ -130,7 +130,7 @@ class ClubCoastCustomizer {
     console.log('Club & Coast Customizer initialized');
   }
 
-  // Fixed zoom functionality
+  // Canvas-based zoom functionality
   setupProductImageZoom() {
     const productImage = document.getElementById('product-image');
     const imageContainer = productImage.parentElement;
@@ -141,41 +141,103 @@ class ClubCoastCustomizer {
     imageContainer.style.position = 'relative';
     imageContainer.style.overflow = 'hidden';
     
-    // Store original styles
-    const originalStyles = {
-      transform: productImage.style.transform || 'none',
-      transition: productImage.style.transition || '',
-      cursor: productImage.style.cursor || 'default'
-    };
+    // Create canvas element for composite zoom image
+    let zoomCanvas = null;
+    let zoomContext = null;
+    let originalImageSrc = productImage.src;
 
-    // Create a larger hover zone that includes both image and overlay
-    const createHoverZone = () => {
+    // Create composite image with logo baked in
+    const createCompositeImage = async () => {
       const logoOverlay = document.getElementById('logo-overlay');
-      return logoOverlay && !logoOverlay.classList.contains('hidden') ? 
-        [productImage, logoOverlay] : [productImage];
+      const logoImg = logoOverlay?.querySelector('img');
+      
+      if (!logoImg || logoOverlay.classList.contains('hidden')) {
+        return null; // No logo to composite
+      }
+
+      return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        const baseImage = new Image();
+        baseImage.crossOrigin = 'anonymous';
+        
+        baseImage.onload = () => {
+          // Set canvas size to match image
+          canvas.width = baseImage.width;
+          canvas.height = baseImage.height;
+          
+          // Draw base product image
+          ctx.drawImage(baseImage, 0, 0);
+          
+          // Load and draw logo
+          const logoImage = new Image();
+          logoImage.crossOrigin = 'anonymous';
+          
+          logoImage.onload = () => {
+            // Calculate logo position based on placement
+            const logoSize = 40; // matches CSS size
+            let logoX, logoY;
+            
+            if (this.state.selectedPlacement === 'left') {
+              logoX = canvas.width * 0.15; // left chest position
+              logoY = canvas.height * 0.25;
+            } else {
+              logoX = canvas.width * 0.85 - logoSize; // right chest position  
+              logoY = canvas.height * 0.25;
+            }
+            
+            // Apply thread color filter to logo if needed
+            const selectedThreadColor = this.threadColors.find(color => color.id === this.state.selectedThreadColor);
+            if (selectedThreadColor && selectedThreadColor.logoStyle.filter !== 'none') {
+              ctx.filter = selectedThreadColor.logoStyle.filter;
+            }
+            
+            // Draw logo onto composite
+            ctx.drawImage(logoImage, logoX, logoY, logoSize, logoSize * (logoImage.height / logoImage.width));
+            
+            // Reset filter
+            ctx.filter = 'none';
+            
+            resolve(canvas.toDataURL());
+          };
+          
+          logoImage.onerror = () => resolve(null);
+          logoImage.src = logoImg.src;
+        };
+        
+        baseImage.onerror = () => resolve(null);
+        baseImage.src = productImage.src;
+      });
     };
 
-    // Mouse enter - start zoom (works for both image and overlay)
-    const handleMouseEnter = (e) => {
+    // Mouse enter - start zoom
+    const handleMouseEnter = async (e) => {
       if (!this.isZoomed) {
         this.isZoomed = true;
+        
+        // Hide the separate logo overlay
+        const logoOverlay = document.getElementById('logo-overlay');
+        if (logoOverlay) {
+          logoOverlay.style.opacity = '0';
+        }
+        
+        // Create composite image if logo is present
+        const compositeImageSrc = await createCompositeImage();
+        
+        if (compositeImageSrc) {
+          // Use composite image for zoom
+          productImage.src = compositeImageSrc;
+        }
+        
         productImage.style.transition = 'transform 0.3s ease-out';
         productImage.style.transform = 'scale(2)';
         productImage.style.cursor = 'zoom-out';
         productImage.style.zIndex = '100';
-        
-        // Scale logo overlay but keep it in fixed position relative to garment
-        const logoOverlay = document.getElementById('logo-overlay');
-        if (logoOverlay && !logoOverlay.classList.contains('hidden')) {
-          logoOverlay.style.transition = 'transform 0.3s ease-out';
-          logoOverlay.style.transform = 'scale(2)';
-          logoOverlay.style.zIndex = '101';
-          logoOverlay.style.pointerEvents = 'none'; // Allow mouse events to pass through
-        }
       }
     };
 
-    // Mouse move - follow cursor for pan effect (only on container)
+    // Mouse move - follow cursor for pan effect
     const handleMouseMove = (e) => {
       if (this.isZoomed) {
         const rect = imageContainer.getBoundingClientRect();
@@ -186,54 +248,43 @@ class ClubCoastCustomizer {
         const centerY = rect.height / 2;
         
         // Calculate transform based on mouse position
-        const moveX = (centerX - x) * 0.5; // Reduce movement for smoother effect
+        const moveX = (centerX - x) * 0.5;
         const moveY = (centerY - y) * 0.5;
         
         productImage.style.transform = `scale(2) translate(${moveX}px, ${moveY}px)`;
-        
-        // Logo overlay should NOT move with pan - it needs to stay in fixed position
-        // We need to calculate the OPPOSITE movement to keep it stationary relative to garment
-        const logoOverlay = document.getElementById('logo-overlay');
-        if (logoOverlay && !logoOverlay.classList.contains('hidden')) {
-          // Apply opposite translation to cancel out the image movement,
-          // keeping logo in same spot relative to the garment
-          logoOverlay.style.transform = `scale(2) translate(${-moveX}px, ${-moveY}px)`;
-        }
       }
     };
 
     // Mouse leave - reset zoom
     const handleMouseLeave = (e) => {
-      // Check if mouse is leaving the entire container area
       const rect = imageContainer.getBoundingClientRect();
       const x = e.clientX;
       const y = e.clientY;
       
-      // Only reset if mouse is actually outside the container
       if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
         if (this.isZoomed) {
           this.isZoomed = false;
-          productImage.style.transform = originalStyles.transform;
+          
+          // Restore original image
+          productImage.src = originalImageSrc;
+          
+          productImage.style.transform = 'none';
           productImage.style.cursor = 'zoom-in';
           productImage.style.zIndex = '1';
           
-          // Reset logo overlay
+          // Show logo overlay again
           const logoOverlay = document.getElementById('logo-overlay');
           if (logoOverlay) {
-            logoOverlay.style.transform = '';
-            logoOverlay.style.zIndex = '';
-            logoOverlay.style.pointerEvents = 'auto'; // Restore pointer events
+            logoOverlay.style.opacity = '1';
           }
         }
       }
     };
 
-    // Add event listeners to image
+    // Add event listeners
     productImage.addEventListener('mouseenter', handleMouseEnter);
     productImage.addEventListener('mousemove', handleMouseMove);
     productImage.addEventListener('mouseleave', handleMouseLeave);
-
-    // Also add listeners to the container to handle overlay interactions
     imageContainer.addEventListener('mouseleave', handleMouseLeave);
     imageContainer.addEventListener('mousemove', handleMouseMove);
 
