@@ -369,7 +369,7 @@ class ClubCoastCustomizer {
     const productImage = document.getElementById('product-image');
     if (productImage) {
       productImage.addEventListener('click', () => {
-        this.openImageZoom();
+        this.openSimpleZoom();
       });
       productImage.style.cursor = 'pointer';
       productImage.title = 'Click to zoom';
@@ -622,3 +622,4 @@ class ClubCoastCustomizer {
 document.addEventListener('DOMContentLoaded', () => {
   new ClubCoastCustomizer();
 });
+
