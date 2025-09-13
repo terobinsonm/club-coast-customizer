@@ -191,11 +191,13 @@ class ClubCoastCustomizer {
         
         productImage.style.transform = `scale(2) translate(${moveX}px, ${moveY}px)`;
         
-        // Keep logo overlay in the same relative position - it scales but doesn't pan
+        // Logo overlay should NOT move with pan - it needs to stay in fixed position
+        // We need to calculate the OPPOSITE movement to keep it stationary relative to garment
         const logoOverlay = document.getElementById('logo-overlay');
         if (logoOverlay && !logoOverlay.classList.contains('hidden')) {
-          // Logo stays in fixed position relative to the garment, only scales
-          logoOverlay.style.transform = `scale(2)`;
+          // Apply opposite translation to cancel out the image movement,
+          // keeping logo in same spot relative to the garment
+          logoOverlay.style.transform = `scale(2) translate(${-moveX}px, ${-moveY}px)`;
         }
       }
     };
