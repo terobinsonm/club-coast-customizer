@@ -301,30 +301,94 @@ body {
   border-radius: 50%;
 }
 
-/* Updated Thread Colors - matches JavaScript */
+/* Thread Colors - Fixed to match Figma design */
 .thread-color-options {
   display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.thread-color {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
+.thread-color-option {
+  width: 100%;
+  padding: 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
+  text-align: left;
   cursor: pointer;
-  border: 2px solid transparent;
   transition: all 0.2s;
-  position: relative;
+  background: white;
+  display: block;
 }
 
-.thread-color.selected {
+.thread-color-option:hover {
+  border-color: #d1d5db;
+}
+
+.thread-color-option.selected {
   border-color: rgba(48, 48, 48, 1);
-  box-shadow: 0 0 0 2px rgba(48, 48, 48, 0.1);
+  background: rgba(48, 48, 48, 0.02);
 }
 
-.thread-color:hover {
-  transform: scale(1.1);
+.thread-color-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.thread-color-info {
+  flex: 1;
+}
+
+.thread-color-info .thread-color-name {
+  font-size: 14px;
+  color: #111827;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.thread-color-info .thread-color-desc {
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.3;
+}
+
+.thread-color-indicator {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(48, 48, 48, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.thread-color-indicator.hidden {
+  display: none;
+}
+
+.thread-color-indicator::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+}
+
+.thread-color-swatches {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.color-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid #d1d5db;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
 }
 
 /* Size Grid */
@@ -451,3 +515,4 @@ body {
     height: 200px;
   }
 }
+
