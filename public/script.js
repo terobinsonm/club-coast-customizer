@@ -548,3 +548,24 @@ class ClubCoastCustomizer {
 document.addEventListener('DOMContentLoaded', () => {
   new ClubCoastCustomizer();
 });
+
+// Simple direct zoom - no class methods
+document.addEventListener('DOMContentLoaded', () => {
+  const img = document.getElementById('product-image');
+  if (img) {
+    let zoomed = false;
+    
+    img.addEventListener('click', () => {
+      if (!zoomed) {
+        img.style.transform = 'scale(2)';
+        img.style.zIndex = '1000';
+        img.style.transition = 'all 0.3s';
+        zoomed = true;
+      } else {
+        img.style.transform = 'scale(1)';
+        img.style.zIndex = '1';
+        zoomed = false;
+      }
+    });
+  }
+});
