@@ -370,7 +370,17 @@ class ClubCoastCustomizer {
       this.addToCart();
     });
   }
-
+  
+// Add this to your bindEvents() method:
+const productImage = document.getElementById('product-image');
+if (productImage) {
+  productImage.addEventListener('click', () => {
+    this.openImageZoom();
+  });
+  productImage.style.cursor = 'pointer';
+  productImage.title = 'Click to zoom';
+}
+  
   selectLogo(logoId) {
     this.state.selectedLogo = logoId;
 
@@ -637,3 +647,4 @@ class ClubCoastCustomizer {
 document.addEventListener('DOMContentLoaded', () => {
   new ClubCoastCustomizer();
 });
+
