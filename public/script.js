@@ -170,18 +170,30 @@ class ClubCoastCustomizer {
     }
   }
 
-  // Method to get color-coordinated palette based on product color
+  // Updated method to get color-coordinated palette AND filter effects
   getCoordinatedColors(productColor) {
-    const colorPalettes = {
-      'Navy': ['#1e3a8a', '#3b82f6', '#60a5fa', '#93c5fd'], // Navy blues
-      'Blue': ['#1e40af', '#2563eb', '#3b82f6', '#60a5fa'], // Bright blues  
-      'White': ['#374151', '#6b7280', '#9ca3af', '#d1d5db']  // Grays for white shirts
+    const colorConfig = {
+      'Navy': {
+        swatches: ['#1e3a8a', '#3b82f6', '#60a5fa', '#93c5fd'],
+        filter: 'hue-rotate(210deg) saturate(1.1)' // Blue tones
+      },
+      'Blue': {
+        swatches: ['#1e40af', '#2563eb', '#3b82f6', '#60a5fa'],
+        filter: 'hue-rotate(200deg) saturate(1.2)' // Bright blues
+      },
+      'White': {
+        swatches: ['#374151', '#6b7280', '#9ca3af', '#d1d5db'],
+        filter: 'saturate(0.3) brightness(0.8)' // Muted/gray tones
+      }
     };
     
-    return colorPalettes[productColor] || ['#4f46e5', '#06b6d4', '#10b981', '#f59e0b'];
+    return colorConfig[productColor] || {
+      swatches: ['#4f46e5', '#06b6d4', '#10b981', '#f59e0b'],
+      filter: 'hue-rotate(45deg) saturate(1.2)'
+    };
   }
 
-  // Updated updateProductFromJWT to update coordinated colors
+  // Updated updateProductFromJWT to update both swatches AND filter effects
   updateProductFromJWT() {
     if (this.jwtData) {
       // Extract product ID from JWT payload
@@ -193,10 +205,12 @@ class ClubCoastCustomizer {
       if (productId && this.PRODUCT_CONFIG[productId]) {
         const product = this.PRODUCT_CONFIG[productId];
         
-        // Update coordinated thread color swatches based on product color
+        // Update coordinated thread color swatches AND filter based on product color
         const coordinatedOption = this.threadColors.find(color => color.id === 'coordinated');
         if (coordinatedOption) {
-          coordinatedOption.swatches = this.getCoordinatedColors(product.color);
+          const colorConfig = this.getCoordinatedColors(product.color);
+          coordinatedOption.swatches = colorConfig.swatches;
+          coordinatedOption.logoStyle.filter = colorConfig.filter;
         }
         
         // Update product title
@@ -214,6 +228,11 @@ class ClubCoastCustomizer {
         
         // Re-render thread colors to show updated swatches
         this.renderThreadColors();
+        
+        // Update logo overlay if coordinated is currently selected
+        if (this.state.selectedThreadColor === 'coordinated') {
+          this.updateLogoOverlay();
+        }
         
         console.log(`Product updated to: ${product.name} - ${product.color} ${product.gender}`);
       } else {
