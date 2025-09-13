@@ -93,7 +93,7 @@ body {
   top: 140px; /* Moved down from 80px to chest level */
   width: 48px;
   height: 48px;
-  background: rgba(255, 255, 255, 0.9);
+  background: transparent; /* Removed white background */
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -101,7 +101,7 @@ body {
   color: white;
   font-size: 18px;
   transition: all 0.3s ease;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: none; /* Removed border since there's no background */
 }
 
 .logo-overlay img {
@@ -560,6 +560,7 @@ body {
     height: 200px;
   }
 }
+
 
 
 
