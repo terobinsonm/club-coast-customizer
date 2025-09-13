@@ -175,21 +175,21 @@ class ClubCoastCustomizer {
     const colorConfig = {
       'Navy': {
         swatches: ['#1e3a8a', '#3b82f6', '#60a5fa', '#93c5fd'],
-        filter: 'hue-rotate(210deg) saturate(1.1)' // Blue tones
+        filter: 'hue-rotate(15deg) saturate(1.1) brightness(0.9)' // Subtle blue shift
       },
       'Blue': {
         swatches: ['#1e40af', '#2563eb', '#3b82f6', '#60a5fa'],
-        filter: 'hue-rotate(200deg) saturate(1.2)' // Bright blues
+        filter: 'hue-rotate(10deg) saturate(1.2) brightness(0.95)' // Slight blue enhancement
       },
       'White': {
         swatches: ['#374151', '#6b7280', '#9ca3af', '#d1d5db'],
-        filter: 'saturate(0.3) brightness(0.8)' // Muted/gray tones
+        filter: 'saturate(0.4) brightness(0.85) contrast(1.1)' // Muted/gray tones
       }
     };
     
     return colorConfig[productColor] || {
       swatches: ['#4f46e5', '#06b6d4', '#10b981', '#f59e0b'],
-      filter: 'hue-rotate(45deg) saturate(1.2)'
+      filter: 'hue-rotate(10deg) saturate(1.1)'
     };
   }
 
