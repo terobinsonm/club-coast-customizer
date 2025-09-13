@@ -326,26 +326,6 @@ class ClubCoastCustomizer {
       });
     });
 
-    // Quantity controls - check if elements exist
-    const qtyMinus = document.getElementById('qty-minus');
-    const qtyPlus = document.getElementById('qty-plus');
-    
-    if (qtyMinus) {
-      qtyMinus.addEventListener('click', () => {
-        if (this.state.quantity > 1) {
-          this.state.quantity--;
-          this.updateQuantityDisplay();
-        }
-      });
-    }
-
-    if (qtyPlus) {
-      qtyPlus.addEventListener('click', () => {
-        this.state.quantity++;
-        this.updateQuantityDisplay();
-      });
-    }
-
     // Add to cart
     document.getElementById('add-to-cart').addEventListener('click', () => {
       this.addToCart();
@@ -457,3 +437,4 @@ class ClubCoastCustomizer {
 document.addEventListener('DOMContentLoaded', () => {
   new ClubCoastCustomizer();
 });
+
