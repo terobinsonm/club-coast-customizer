@@ -130,7 +130,7 @@ class ClubCoastCustomizer {
     console.log('Club & Coast Customizer initialized');
   }
 
-  // Canvas-based zoom functionality
+  // Fixed zoom with logo staying in proper position
   setupProductImageZoom() {
     const productImage = document.getElementById('product-image');
     const imageContainer = productImage.parentElement;
@@ -140,100 +140,32 @@ class ClubCoastCustomizer {
     // Set up container for zoom
     imageContainer.style.position = 'relative';
     imageContainer.style.overflow = 'hidden';
-    
-    // Create canvas element for composite zoom image
-    let zoomCanvas = null;
-    let zoomContext = null;
-    let originalImageSrc = productImage.src;
-
-    // Create composite image with logo baked in
-    const createCompositeImage = async () => {
-      const logoOverlay = document.getElementById('logo-overlay');
-      const logoImg = logoOverlay?.querySelector('img');
-      
-      if (!logoImg || logoOverlay.classList.contains('hidden')) {
-        return null; // No logo to composite
-      }
-
-      return new Promise((resolve) => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        
-        const baseImage = new Image();
-        baseImage.crossOrigin = 'anonymous';
-        
-        baseImage.onload = () => {
-          // Set canvas size to match image
-          canvas.width = baseImage.width;
-          canvas.height = baseImage.height;
-          
-          // Draw base product image
-          ctx.drawImage(baseImage, 0, 0);
-          
-          // Load and draw logo
-          const logoImage = new Image();
-          logoImage.crossOrigin = 'anonymous';
-          
-          logoImage.onload = () => {
-            // Calculate logo position based on placement
-            const logoSize = 40; // matches CSS size
-            let logoX, logoY;
-            
-            if (this.state.selectedPlacement === 'left') {
-              logoX = canvas.width * 0.15; // left chest position
-              logoY = canvas.height * 0.25;
-            } else {
-              logoX = canvas.width * 0.85 - logoSize; // right chest position  
-              logoY = canvas.height * 0.25;
-            }
-            
-            // Apply thread color filter to logo if needed
-            const selectedThreadColor = this.threadColors.find(color => color.id === this.state.selectedThreadColor);
-            if (selectedThreadColor && selectedThreadColor.logoStyle.filter !== 'none') {
-              ctx.filter = selectedThreadColor.logoStyle.filter;
-            }
-            
-            // Draw logo onto composite
-            ctx.drawImage(logoImage, logoX, logoY, logoSize, logoSize * (logoImage.height / logoImage.width));
-            
-            // Reset filter
-            ctx.filter = 'none';
-            
-            resolve(canvas.toDataURL());
-          };
-          
-          logoImage.onerror = () => resolve(null);
-          logoImage.src = logoImg.src;
-        };
-        
-        baseImage.onerror = () => resolve(null);
-        baseImage.src = productImage.src;
-      });
-    };
 
     // Mouse enter - start zoom
-    const handleMouseEnter = async (e) => {
+    const handleMouseEnter = (e) => {
       if (!this.isZoomed) {
         this.isZoomed = true;
         
-        // Hide the separate logo overlay
         const logoOverlay = document.getElementById('logo-overlay');
-        if (logoOverlay) {
-          logoOverlay.style.opacity = '0';
-        }
         
-        // Create composite image if logo is present
-        const compositeImageSrc = await createCompositeImage();
-        
-        if (compositeImageSrc) {
-          // Use composite image for zoom
-          productImage.src = compositeImageSrc;
+        // Set transform origin to center for both elements
+        productImage.style.transformOrigin = 'center center';
+        if (logoOverlay && !logoOverlay.classList.contains('hidden')) {
+          logoOverlay.style.transformOrigin = 'center center';
+          logoOverlay.style.transition = 'transform 0.3s ease-out';
+          logoOverlay.style.pointerEvents = 'none';
         }
         
         productImage.style.transition = 'transform 0.3s ease-out';
         productImage.style.transform = 'scale(2)';
         productImage.style.cursor = 'zoom-out';
         productImage.style.zIndex = '100';
+        
+        // Scale logo overlay with same transform origin
+        if (logoOverlay && !logoOverlay.classList.contains('hidden')) {
+          logoOverlay.style.transform = 'scale(2)';
+          logoOverlay.style.zIndex = '101';
+        }
       }
     };
 
@@ -251,7 +183,14 @@ class ClubCoastCustomizer {
         const moveX = (centerX - x) * 0.5;
         const moveY = (centerY - y) * 0.5;
         
-        productImage.style.transform = `scale(2) translate(${moveX}px, ${moveY}px)`;
+        // Apply same transform to both image and logo
+        const transform = `scale(2) translate(${moveX}px, ${moveY}px)`;
+        productImage.style.transform = transform;
+        
+        const logoOverlay = document.getElementById('logo-overlay');
+        if (logoOverlay && !logoOverlay.classList.contains('hidden')) {
+          logoOverlay.style.transform = transform;
+        }
       }
     };
 
@@ -265,17 +204,15 @@ class ClubCoastCustomizer {
         if (this.isZoomed) {
           this.isZoomed = false;
           
-          // Restore original image
-          productImage.src = originalImageSrc;
-          
-          productImage.style.transform = 'none';
+          productImage.style.transform = 'scale(1)';
           productImage.style.cursor = 'zoom-in';
           productImage.style.zIndex = '1';
           
-          // Show logo overlay again
           const logoOverlay = document.getElementById('logo-overlay');
           if (logoOverlay) {
-            logoOverlay.style.opacity = '1';
+            logoOverlay.style.transform = 'scale(1)';
+            logoOverlay.style.zIndex = '';
+            logoOverlay.style.pointerEvents = 'auto';
           }
         }
       }
