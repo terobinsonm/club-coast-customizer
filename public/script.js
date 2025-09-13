@@ -348,6 +348,7 @@ class ClubCoastCustomizer {
   }
 
 // Updated selectThreadColor method to trigger logo update
+// Fixed selectThreadColor method
 selectThreadColor(colorId) {
   this.state.selectedThreadColor = colorId;
 
@@ -362,8 +363,9 @@ selectThreadColor(colorId) {
 
   // Update logo overlay to reflect new thread color
   this.updateLogoOverlay();
+}
 
-  // Updated updateLogoOverlay method to apply thread color styling
+// Updated updateLogoOverlay method (moved outside and corrected)
 updateLogoOverlay() {
   const overlay = document.getElementById('logo-overlay');
   const selectedLogo = this.allLogos.find(logo => logo.id === this.state.selectedLogo);
@@ -466,6 +468,7 @@ addToCart() {
 document.addEventListener('DOMContentLoaded', () => {
   new ClubCoastCustomizer();
 });
+
 
 
 
