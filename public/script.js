@@ -365,22 +365,22 @@ class ClubCoastCustomizer {
       });
     });
 
+    // Product image click to zoom
+    const productImage = document.getElementById('product-image');
+    if (productImage) {
+      productImage.addEventListener('click', () => {
+        this.openImageZoom();
+      });
+      productImage.style.cursor = 'pointer';
+      productImage.title = 'Click to zoom';
+    }
+
     // Add to cart
     document.getElementById('add-to-cart').addEventListener('click', () => {
       this.addToCart();
     });
   }
-  
-// Add this to your bindEvents() method:
-const productImage = document.getElementById('product-image');
-if (productImage) {
-  productImage.addEventListener('click', () => {
-    this.openImageZoom();
-  });
-  productImage.style.cursor = 'pointer';
-  productImage.title = 'Click to zoom';
-}
-  
+
   selectLogo(logoId) {
     this.state.selectedLogo = logoId;
 
@@ -647,4 +647,3 @@ if (productImage) {
 document.addEventListener('DOMContentLoaded', () => {
   new ClubCoastCustomizer();
 });
-
