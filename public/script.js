@@ -112,7 +112,6 @@ class ClubCoastCustomizer {
       selectedPlacement: 'left',
       selectedThreadColor: 'club',
       logoSearchQuery: '',
-      quantity: 1
     };
 
     this.init();
@@ -390,34 +389,34 @@ class ClubCoastCustomizer {
     }
   }
 
-  addToCart() {
-    const selectedLogo = this.allLogos.find(logo => logo.id === this.state.selectedLogo);
-    const selectedThreadColor = this.threadColors.find(color => color.id === this.state.selectedThreadColor);
+addToCart() {
+  const selectedLogo = this.allLogos.find(logo => logo.id === this.state.selectedLogo);
+  const selectedThreadColor = this.threadColors.find(color => color.id === this.state.selectedThreadColor);
 
-    const customizationData = {
-      productNumber: this.jwtData?.productNumber || 'CNC-P1000',
-      customizations: {
-        logo: selectedLogo,
-        placement: this.state.selectedPlacement,
-        threadColor: selectedThreadColor,
-        quantity: this.state.quantity
-      },
-      timestamp: new Date().toISOString()
-    };
+  const customizationData = {
+    productNumber: this.jwtData?.productNumber || 'CNC-P1000',
+    customizations: {
+      logo: selectedLogo,
+      placement: this.state.selectedPlacement,
+      threadColor: selectedThreadColor
+      // Removed quantity since it's no longer needed
+    },
+    timestamp: new Date().toISOString()
+  };
 
-    console.log('Sending customization data back to RepSpark:', customizationData);
+  console.log('Sending customization data back to RepSpark:', customizationData);
 
-    // Send data back to RepSpark parent window
-    if (window.parent && window.parent !== window) {
-      window.parent.postMessage({
-        action: 'SAVE',
-        payload: customizationData
-      }, 'https://app.repspark.com');
-    } else {
-      // Demo mode - show alert
-      alert(`Added to cart!\n\nLogo: ${selectedLogo.name}\nPlacement: ${this.state.selectedPlacement} chest\nThread Color: ${selectedThreadColor.name}\nQuantity: ${this.state.quantity}`);
-    }
+  // Send data back to RepSpark parent window
+  if (window.parent && window.parent !== window) {
+    window.parent.postMessage({
+      action: 'SAVE',
+      payload: customizationData
+    }, 'https://app.repspark.com');
+  } else {
+    // Demo mode - show alert (removed quantity from alert)
+    alert(`Added to cart!\n\nLogo: ${selectedLogo.name}\nPlacement: ${this.state.selectedPlacement} chest\nThread Color: ${selectedThreadColor.name}`);
   }
+}
 
   // Method to get current customization state (for RepSpark integration)
   getCustomizationState() {
@@ -437,4 +436,5 @@ class ClubCoastCustomizer {
 document.addEventListener('DOMContentLoaded', () => {
   new ClubCoastCustomizer();
 });
+
 
