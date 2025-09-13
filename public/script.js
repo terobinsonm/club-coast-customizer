@@ -58,10 +58,10 @@ class ClubCoastCustomizer {
       }
     };
 
-    // JWT data from RepSpark (will be populated from URL params)
+    // JWT data from RepSpark
     this.jwtData = null;
     
-    // All available logos (your current working version)
+    // All available logos
     this.allLogos = [
       { id: '1',  name: 'Kiawah Island Golf Resort',      preview: './images/kiawah.png' },
       { id: '2',  name: 'Whistling Straits Golf Shop',    preview: './images/whistling-straits.png' },
@@ -72,10 +72,10 @@ class ClubCoastCustomizer {
       { id: '7',  name: 'TPC Sawgrass',                   preview: './images/tpc-sawgrass.png' },
     ];
 
-    // Initially displayed logos (first 4)
+    // Initially displayed logos
     this.initialLogos = this.allLogos.slice(0, 4);
 
-    // Updated thread colors with dynamic color coordination
+    // Thread colors with dynamic coordination
     this.threadColors = [
       { 
         id: 'club',
@@ -90,7 +90,7 @@ class ClubCoastCustomizer {
         id: 'coordinated',
         name: 'Coordinated',
         description: 'Complementary color palette',
-        swatches: ['#4f46e5', '#06b6d4', '#10b981', '#f59e0b'], // Will be updated dynamically
+        swatches: ['#4f46e5', '#06b6d4', '#10b981', '#f59e0b'],
         logoStyle: {
           filter: 'hue-rotate(45deg) saturate(1.2)'
         }
@@ -114,6 +114,9 @@ class ClubCoastCustomizer {
       logoSearchQuery: '',
     };
 
+    // Zoom state
+    this.isZoomed = false;
+
     this.init();
   }
 
@@ -122,8 +125,92 @@ class ClubCoastCustomizer {
     this.renderLogos();
     this.renderThreadColors();
     this.bindEvents();
+    this.setupProductImageZoom(); // Initialize zoom functionality
     this.updateLogoOverlay();
     console.log('Club & Coast Customizer initialized');
+  }
+
+  // Fixed zoom functionality
+  setupProductImageZoom() {
+    const productImage = document.getElementById('product-image');
+    const imageContainer = productImage.parentElement;
+    
+    if (!productImage) return;
+
+    // Set up container for zoom
+    imageContainer.style.position = 'relative';
+    imageContainer.style.overflow = 'hidden';
+    
+    // Store original styles
+    const originalStyles = {
+      transform: productImage.style.transform || 'none',
+      transition: productImage.style.transition || '',
+      cursor: productImage.style.cursor || 'default'
+    };
+
+    // Mouse enter - start zoom
+    productImage.addEventListener('mouseenter', (e) => {
+      if (!this.isZoomed) {
+        this.isZoomed = true;
+        productImage.style.transition = 'transform 0.3s ease-out';
+        productImage.style.transform = 'scale(2)';
+        productImage.style.cursor = 'zoom-out';
+        productImage.style.zIndex = '100';
+        
+        // Also zoom the logo overlay if visible
+        const logoOverlay = document.getElementById('logo-overlay');
+        if (logoOverlay && !logoOverlay.classList.contains('hidden')) {
+          logoOverlay.style.transition = 'transform 0.3s ease-out';
+          logoOverlay.style.transform = 'scale(2)';
+          logoOverlay.style.zIndex = '101';
+        }
+      }
+    });
+
+    // Mouse move - follow cursor for pan effect
+    productImage.addEventListener('mousemove', (e) => {
+      if (this.isZoomed) {
+        const rect = imageContainer.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
+        // Calculate transform based on mouse position
+        const moveX = (centerX - x) * 0.5; // Reduce movement for smoother effect
+        const moveY = (centerY - y) * 0.5;
+        
+        productImage.style.transform = `scale(2) translate(${moveX}px, ${moveY}px)`;
+        
+        // Move logo overlay with image
+        const logoOverlay = document.getElementById('logo-overlay');
+        if (logoOverlay && !logoOverlay.classList.contains('hidden')) {
+          logoOverlay.style.transform = `scale(2) translate(${moveX}px, ${moveY}px)`;
+        }
+      }
+    });
+
+    // Mouse leave - reset zoom
+    productImage.addEventListener('mouseleave', () => {
+      if (this.isZoomed) {
+        this.isZoomed = false;
+        productImage.style.transform = originalStyles.transform;
+        productImage.style.cursor = 'zoom-in';
+        productImage.style.zIndex = '1';
+        
+        // Reset logo overlay
+        const logoOverlay = document.getElementById('logo-overlay');
+        if (logoOverlay) {
+          logoOverlay.style.transform = '';
+          logoOverlay.style.zIndex = '';
+        }
+      }
+    });
+
+    // Set initial cursor
+    productImage.style.cursor = 'zoom-in';
+    productImage.title = 'Hover to zoom and explore details';
   }
 
   parseJWTFromURL() {
@@ -170,20 +257,19 @@ class ClubCoastCustomizer {
     }
   }
 
-  // Updated method to get color-coordinated palette AND filter effects
   getCoordinatedColors(productColor) {
     const colorConfig = {
       'Navy': {
         swatches: ['#1e3a8a', '#3b82f6', '#60a5fa', '#93c5fd'],
-        filter: 'hue-rotate(15deg) saturate(1.1) brightness(0.9)' // Subtle blue shift
+        filter: 'hue-rotate(15deg) saturate(1.1) brightness(0.9)'
       },
       'Blue': {
         swatches: ['#1e40af', '#2563eb', '#3b82f6', '#60a5fa'],
-        filter: 'hue-rotate(10deg) saturate(1.2) brightness(0.95)' // Slight blue enhancement
+        filter: 'hue-rotate(10deg) saturate(1.2) brightness(0.95)'
       },
       'White': {
         swatches: ['#374151', '#6b7280', '#9ca3af', '#d1d5db'],
-        filter: 'saturate(0.4) brightness(0.85) contrast(1.1)' // Muted/gray tones
+        filter: 'saturate(0.4) brightness(0.85) contrast(1.1)'
       }
     };
     
@@ -193,10 +279,8 @@ class ClubCoastCustomizer {
     };
   }
 
-  // Updated updateProductFromJWT to update both swatches AND filter effects
   updateProductFromJWT() {
     if (this.jwtData) {
-      // Extract product ID from JWT payload
       const productId = this.jwtData.productNumber || 
                        this.jwtData.productId || 
                        this.jwtData.product?.id ||
@@ -205,7 +289,6 @@ class ClubCoastCustomizer {
       if (productId && this.PRODUCT_CONFIG[productId]) {
         const product = this.PRODUCT_CONFIG[productId];
         
-        // Update coordinated thread color swatches AND filter based on product color
         const coordinatedOption = this.threadColors.find(color => color.id === 'coordinated');
         if (coordinatedOption) {
           const colorConfig = this.getCoordinatedColors(product.color);
@@ -213,30 +296,25 @@ class ClubCoastCustomizer {
           coordinatedOption.logoStyle.filter = colorConfig.filter;
         }
         
-        // Update product title
         const titleElement = document.getElementById('product-title');
         if (titleElement) {
           titleElement.textContent = `${product.name} - ${product.color} ${product.gender}`;
         }
         
-        // Update product image
         const imageElement = document.getElementById('product-image');
         if (imageElement) {
           imageElement.src = product.image;
           imageElement.alt = product.alt;
         }
         
-        // Re-render thread colors to show updated swatches
         this.renderThreadColors();
         
-        // Update logo overlay if coordinated is currently selected
         if (this.state.selectedThreadColor === 'coordinated') {
           this.updateLogoOverlay();
         }
         
         console.log(`Product updated to: ${product.name} - ${product.color} ${product.gender}`);
       } else {
-        // Fallback to JWT data or default
         const titleElement = document.getElementById('product-title');
         if (titleElement && this.jwtData.productName) {
           titleElement.textContent = this.jwtData.productName;
@@ -271,7 +349,6 @@ class ClubCoastCustomizer {
       </button>
     `).join('');
 
-    // Add click handlers
     logoGrid.querySelectorAll('.logo-option').forEach(option => {
       option.addEventListener('click', () => {
         const logoId = option.dataset.logo;
@@ -301,7 +378,6 @@ class ClubCoastCustomizer {
       </button>
     `).join('');
 
-    // Add click handlers
     container.querySelectorAll('.thread-color-option').forEach(option => {
       option.addEventListener('click', () => {
         const colorId = option.dataset.color;
@@ -365,16 +441,6 @@ class ClubCoastCustomizer {
       });
     });
 
-    // Product image click to zoom
-    const productImage = document.getElementById('product-image');
-    if (productImage) {
-      productImage.addEventListener('click', () => {
-        this.openImageZoom();
-      });
-      productImage.style.cursor = 'pointer';
-      productImage.title = 'Click to zoom';
-    }
-
     // Add to cart
     document.getElementById('add-to-cart').addEventListener('click', () => {
       this.addToCart();
@@ -384,7 +450,6 @@ class ClubCoastCustomizer {
   selectLogo(logoId) {
     this.state.selectedLogo = logoId;
 
-    // Update logo selection visual state
     document.querySelectorAll('.logo-option').forEach(option => {
       option.classList.toggle('selected', option.dataset.logo === logoId);
     });
@@ -392,11 +457,9 @@ class ClubCoastCustomizer {
     this.updateLogoOverlay();
   }
 
-  // Fixed selectThreadColor method
   selectThreadColor(colorId) {
     this.state.selectedThreadColor = colorId;
 
-    // Update thread color selection visual state
     document.querySelectorAll('.thread-color-option').forEach(option => {
       const isSelected = option.dataset.color === colorId;
       option.classList.toggle('selected', isSelected);
@@ -405,11 +468,9 @@ class ClubCoastCustomizer {
       indicator.classList.toggle('hidden', !isSelected);
     });
 
-    // Update logo overlay to reflect new thread color
     this.updateLogoOverlay();
   }
 
-  // Updated updateLogoOverlay method - removed borders and backgrounds
   updateLogoOverlay() {
     const overlay = document.getElementById('logo-overlay');
     const selectedLogo = this.allLogos.find(logo => logo.id === this.state.selectedLogo);
@@ -426,14 +487,12 @@ class ClubCoastCustomizer {
         img.style.height = '30px';
         img.style.objectFit = 'contain';
         
-        // Apply only filter effects - no borders or backgrounds
         if (selectedThreadColor && selectedThreadColor.logoStyle) {
           img.style.filter = selectedThreadColor.logoStyle.filter;
         } else {
           img.style.filter = 'none';
         }
         
-        // Reset overlay styling to transparent
         overlay.style.border = 'none';
         overlay.style.backgroundColor = 'transparent';
         overlay.style.padding = '0';
@@ -470,19 +529,16 @@ class ClubCoastCustomizer {
 
     console.log('Sending customization data back to RepSpark:', customizationData);
 
-    // Send data back to RepSpark parent window
     if (window.parent && window.parent !== window) {
       window.parent.postMessage({
         action: 'SAVE',
         payload: customizationData
       }, 'https://app.repspark.com');
     } else {
-      // Demo mode - show alert (removed quantity from alert)
       alert(`Added to cart!\n\nLogo: ${selectedLogo.name}\nPlacement: ${this.state.selectedPlacement} chest\nThread Color: ${selectedThreadColor.name}`);
     }
   }
 
-  // Method to get current customization state (for RepSpark integration)
   getCustomizationState() {
     const selectedLogo = this.allLogos.find(logo => logo.id === this.state.selectedLogo);
     const selectedThreadColor = this.threadColors.find(color => color.id === this.state.selectedThreadColor);
@@ -493,79 +549,9 @@ class ClubCoastCustomizer {
       threadColor: selectedThreadColor
     };
   }
-
-  // In-place zoom that stays within the current container
-  setupInPlaceZoom(productImage) {
-    const container = productImage.parentElement;
-    let isZoomed = false;
-    
-    // Store original styles
-    const originalTransform = productImage.style.transform;
-    const originalTransition = productImage.style.transition;
-    const originalZIndex = productImage.style.zIndex;
-    
-    productImage.addEventListener('mouseenter', () => {
-      if (!isZoomed) {
-        productImage.style.transition = 'transform 0.3s ease';
-        productImage.style.transform = 'scale(1.8)';
-        productImage.style.zIndex = '100';
-        productImage.style.cursor = 'zoom-out';
-        isZoomed = true;
-        
-        // Also scale the logo overlay
-        const logoOverlay = document.getElementById('logo-overlay');
-        if (logoOverlay && !logoOverlay.classList.contains('hidden')) {
-          logoOverlay.style.transition = 'transform 0.3s ease';
-          logoOverlay.style.transform = 'scale(1.8)';
-          logoOverlay.style.zIndex = '101';
-        }
-      }
-    });
-    
-    productImage.addEventListener('mouseleave', () => {
-      if (isZoomed) {
-        productImage.style.transform = originalTransform;
-        productImage.style.zIndex = originalZIndex;
-        productImage.style.cursor = 'zoom-in';
-        isZoomed = false;
-        
-        // Reset logo overlay
-        const logoOverlay = document.getElementById('logo-overlay');
-        if (logoOverlay) {
-          logoOverlay.style.transform = '';
-          logoOverlay.style.zIndex = '';
-        }
-      }
-    });
-    
-    // Set initial cursor
-    productImage.style.cursor = 'zoom-in';
-    productImage.title = 'Hover to zoom';
-  }
 }
 
 // Initialize the customizer when the page loads
 document.addEventListener('DOMContentLoaded', () => {
   new ClubCoastCustomizer();
-});
-
-// Simple direct zoom - no class methods
-document.addEventListener('DOMContentLoaded', () => {
-  const img = document.getElementById('product-image');
-  if (img) {
-    let zoomed = false;
-    
-    img.addEventListener('click', () => {
-      if (!zoomed) {
-        img.style.transform = 'scale(2)';
-        img.style.zIndex = '1000';
-        img.style.transition = 'all 0.3s';
-        zoomed = true;
-      } else {
-        img.style.transform = 'scale(1)';
-        img.style.zIndex = '1';
-        zoomed = false;
-      }
-    });
-  }
 });
