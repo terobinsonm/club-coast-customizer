@@ -494,151 +494,135 @@ class ClubCoastCustomizer {
     };
   }
 
-  // New method to open image zoom modal
-  openImageZoom() {
-    const productImage = document.getElementById('product-image');
-    const logoOverlay = document.getElementById('logo-overlay');
-    
-    if (!productImage) return;
+  // Method to setup hover zoom magnifying glass effect
+  setupHoverZoom(productImage) {
+    const container = productImage.parentElement;
+    let zoomLens = null;
+    const zoomFactor = 2.5; // How much to magnify
 
-    // Create modal overlay
-    const modal = document.createElement('div');
-    modal.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.8);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      cursor: pointer;
-      backdrop-filter: blur(4px);
-    `;
-
-    // Create container for zoomed content
-    const container = document.createElement('div');
-    container.style.cssText = `
-      position: relative;
-      max-width: 90vw;
-      max-height: 90vh;
-      cursor: default;
-    `;
-
-    // Create zoomed product image
-    const zoomedImage = document.createElement('img');
-    zoomedImage.src = productImage.src;
-    zoomedImage.alt = productImage.alt;
-    zoomedImage.style.cssText = `
-      width: auto;
-      height: auto;
-      max-width: 100%;
-      max-height: 90vh;
-      border-radius: 8px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-    `;
-
-    // Clone and scale up the logo overlay if it exists and is visible
-    if (logoOverlay && !logoOverlay.classList.contains('hidden')) {
-      const zoomedLogoOverlay = logoOverlay.cloneNode(true);
-      zoomedLogoOverlay.id = 'zoomed-logo-overlay';
-      
-      // Scale up the logo for zoom view
-      const logoImg = zoomedLogoOverlay.querySelector('img');
-      if (logoImg) {
-        logoImg.style.width = '120px';  // 3x larger than original 40px
-        logoImg.style.height = '90px';  // 3x larger than original 30px
-      }
-      
-      // Position the logo overlay on the zoomed image
-      zoomedLogoOverlay.style.cssText += `
+    const createZoomLens = () => {
+      zoomLens = document.createElement('div');
+      zoomLens.style.cssText = `
         position: absolute;
+        width: 150px;
+        height: 150px;
+        border: 3px solid #ffffff;
+        border-radius: 50%;
         pointer-events: none;
+        z-index: 1000;
+        background-repeat: no-repeat;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        display: none;
       `;
-      
-      // Apply the same positioning logic but scaled up
-      const placement = this.state.selectedPlacement;
-      if (placement === 'left') {
-        zoomedLogoOverlay.style.left = '15%';
-        zoomedLogoOverlay.style.top = '25%';
-      } else if (placement === 'right') {
-        zoomedLogoOverlay.style.right = '15%';
-        zoomedLogoOverlay.style.top = '25%';
-      } else { // center
-        zoomedLogoOverlay.style.left = '50%';
-        zoomedLogoOverlay.style.top = '30%';
-        zoomedLogoOverlay.style.transform = 'translateX(-50%)';
-      }
-      
-      container.appendChild(zoomedLogoOverlay);
-    }
-
-    // Create close button
-    const closeButton = document.createElement('button');
-    closeButton.innerHTML = '×';
-    closeButton.style.cssText = `
-      position: absolute;
-      top: -10px;
-      right: -10px;
-      width: 40px;
-      height: 40px;
-      border: none;
-      border-radius: 50%;
-      background: white;
-      color: #333;
-      font-size: 24px;
-      font-weight: bold;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-      z-index: 10000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    `;
-
-    // Add hover effect to close button
-    closeButton.addEventListener('mouseenter', () => {
-      closeButton.style.background = '#f3f4f6';
-    });
-    closeButton.addEventListener('mouseleave', () => {
-      closeButton.style.background = 'white';
-    });
-
-    // Assemble modal
-    container.appendChild(zoomedImage);
-    container.appendChild(closeButton);
-    modal.appendChild(container);
-    document.body.appendChild(modal);
-
-    // Close modal function
-    const closeModal = () => {
-      document.body.removeChild(modal);
-      document.body.style.overflow = ''; // Restore scrolling
+      container.appendChild(zoomLens);
     };
 
-    // Event listeners for closing
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) closeModal();
-    });
-    closeButton.addEventListener('click', closeModal);
-    
-    // Close on Escape key
-    const handleEscape = (e) => {
-      if (e.key === 'Escape') {
-        closeModal();
-        document.removeEventListener('keydown', handleEscape);
-      }
+    const updateZoomLens = (e) => {
+      if (!zoomLens) return;
+
+      const rect = productImage.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+      
+      // Calculate mouse position relative to image
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      // Calculate background position for zoom effect
+      const bgX = -(x * zoomFactor - zoomLens.offsetWidth / 2);
+      const bgY = -(y * zoomFactor - zoomLens.offsetHeight / 2);
+      
+      // Position the lens to follow cursor
+      const lensX = e.clientX - containerRect.left - zoomLens.offsetWidth / 2;
+      const lensY = e.clientY - containerRect.top - zoomLens.offsetHeight / 2;
+      
+      // Update lens position and background
+      zoomLens.style.left = `${lensX}px`;
+      zoomLens.style.top = `${lensY}px`;
+      
+      // Create a canvas to combine the product image and logo overlay
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      // Set canvas size to match the product image
+      canvas.width = productImage.naturalWidth || productImage.width;
+      canvas.height = productImage.naturalHeight || productImage.height;
+      
+      // Create a new image to ensure it's loaded
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      
+      img.onload = () => {
+        // Draw the product image
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        
+        // Draw the logo overlay if it exists and is visible
+        const logoOverlay = document.getElementById('logo-overlay');
+        const logoImg = logoOverlay?.querySelector('img');
+        
+        if (logoImg && !logoOverlay.classList.contains('hidden')) {
+          const logoCanvas = new Image();
+          logoCanvas.crossOrigin = 'anonymous';
+          
+          logoCanvas.onload = () => {
+            // Calculate logo position based on placement
+            let logoX, logoY;
+            const logoWidth = 40 * (canvas.width / productImage.width);
+            const logoHeight = 30 * (canvas.height / productImage.height);
+            
+            if (this.state.selectedPlacement === 'left') {
+              logoX = canvas.width * 0.15;
+              logoY = canvas.height * 0.25;
+            } else if (this.state.selectedPlacement === 'right') {
+              logoX = canvas.width * 0.85 - logoWidth;
+              logoY = canvas.height * 0.25;
+            } else { // center
+              logoX = canvas.width * 0.5 - logoWidth / 2;
+              logoY = canvas.height * 0.3;
+            }
+            
+            // Apply thread color filter if needed
+            const selectedThreadColor = this.threadColors.find(color => color.id === this.state.selectedThreadColor);
+            if (selectedThreadColor && selectedThreadColor.logoStyle.filter !== 'none') {
+              ctx.filter = selectedThreadColor.logoStyle.filter;
+            }
+            
+            ctx.drawImage(logoCanvas, logoX, logoY, logoWidth, logoHeight);
+            ctx.filter = 'none'; // Reset filter
+            
+            // Convert canvas to data URL and use as background
+            const compositeDataUrl = canvas.toDataURL();
+            zoomLens.style.backgroundImage = `url(${compositeDataUrl})`;
+            zoomLens.style.backgroundSize = `${canvas.width * zoomFactor}px ${canvas.height * zoomFactor}px`;
+            zoomLens.style.backgroundPosition = `${bgX}px ${bgY}px`;
+          };
+          
+          logoCanvas.src = logoImg.src;
+        } else {
+          // No logo, just use the product image
+          const dataUrl = canvas.toDataURL();
+          zoomLens.style.backgroundImage = `url(${dataUrl})`;
+          zoomLens.style.backgroundSize = `${canvas.width * zoomFactor}px ${canvas.height * zoomFactor}px`;
+          zoomLens.style.backgroundPosition = `${bgX}px ${bgY}px`;
+        }
+      };
+      
+      img.src = productImage.src;
     };
-    document.addEventListener('keydown', handleEscape);
 
-    // Prevent background scrolling
-    document.body.style.overflow = 'hidden';
+    // Event listeners
+    productImage.addEventListener('mouseenter', () => {
+      if (!zoomLens) createZoomLens();
+      zoomLens.style.display = 'block';
+      productImage.style.cursor = 'none'; // Hide cursor over image
+    });
 
-    // Prevent container clicks from closing modal
-    container.addEventListener('click', (e) => {
-      e.stopPropagation();
+    productImage.addEventListener('mousemove', updateZoomLens);
+
+    productImage.addEventListener('mouseleave', () => {
+      if (zoomLens) {
+        zoomLens.style.display = 'none';
+      }
+      productImage.style.cursor = 'default';
     });
   }
 }
