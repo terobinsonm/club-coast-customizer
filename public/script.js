@@ -494,68 +494,126 @@ class ClubCoastCustomizer {
     };
   }
 
-  // Method to setup hover zoom magnifying glass effect
-  setupHoverZoom(productImage) {
-    const container = productImage.parentElement;
-    let zoomLens = null;
-    const zoomFactor = 2;
+  // Simple click-to-zoom modal
+  openSimpleZoom() {
+    const productImage = document.getElementById('product-image');
+    const logoOverlay = document.getElementById('logo-overlay');
+    
+    if (!productImage) return;
 
-    const createZoomLens = () => {
-      zoomLens = document.createElement('div');
-      zoomLens.style.cssText = `
-        position: absolute;
-        width: 120px;
-        height: 120px;
-        border: 2px solid #ffffff;
-        border-radius: 50%;
-        pointer-events: none;
-        z-index: 1000;
-        background-size: ${productImage.width * zoomFactor}px ${productImage.height * zoomFactor}px;
-        background-repeat: no-repeat;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-        display: none;
-        background-image: url(${productImage.src});
-      `;
-      container.appendChild(zoomLens);
+    // Create modal
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      cursor: pointer;
+    `;
+
+    // Create image container
+    const container = document.createElement('div');
+    container.style.cssText = `
+      position: relative;
+      max-width: 80vw;
+      max-height: 80vh;
+    `;
+
+    // Create enlarged image
+    const enlargedImage = document.createElement('img');
+    enlargedImage.src = productImage.src;
+    enlargedImage.alt = productImage.alt;
+    enlargedImage.style.cssText = `
+      width: auto;
+      height: auto;
+      max-width: 100%;
+      max-height: 80vh;
+      border-radius: 8px;
+    `;
+
+    // Add logo overlay if visible
+    if (logoOverlay && !logoOverlay.classList.contains('hidden')) {
+      const enlargedLogoOverlay = logoOverlay.cloneNode(true);
+      enlargedLogoOverlay.style.position = 'absolute';
+      enlargedLogoOverlay.style.pointerEvents = 'none';
+      
+      // Scale up logo (3x larger)
+      const logoImg = enlargedLogoOverlay.querySelector('img');
+      if (logoImg) {
+        logoImg.style.width = '120px';
+        logoImg.style.height = '90px';
+      }
+      
+      // Position based on placement
+      if (this.state.selectedPlacement === 'left') {
+        enlargedLogoOverlay.style.left = '15%';
+        enlargedLogoOverlay.style.top = '25%';
+      } else if (this.state.selectedPlacement === 'right') {
+        enlargedLogoOverlay.style.right = '15%';
+        enlargedLogoOverlay.style.top = '25%';
+      } else {
+        enlargedLogoOverlay.style.left = '50%';
+        enlargedLogoOverlay.style.top = '30%';
+        enlargedLogoOverlay.style.transform = 'translateX(-50%)';
+      }
+      
+      container.appendChild(enlargedLogoOverlay);
+    }
+
+    // Create close button
+    const closeButton = document.createElement('div');
+    closeButton.innerHTML = '×';
+    closeButton.style.cssText = `
+      position: absolute;
+      top: -15px;
+      right: -15px;
+      width: 30px;
+      height: 30px;
+      background: white;
+      color: black;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 10000;
+    `;
+
+    // Assemble modal
+    container.appendChild(enlargedImage);
+    container.appendChild(closeButton);
+    modal.appendChild(container);
+    document.body.appendChild(modal);
+
+    // Close handlers
+    const closeModal = () => {
+      document.body.removeChild(modal);
     };
 
-    const updateZoomLens = (e) => {
-      if (!zoomLens) return;
-
-      const rect = productImage.getBoundingClientRect();
-      const containerRect = container.getBoundingClientRect();
-      
-      // Calculate mouse position relative to image
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      
-      // Calculate background position for zoom effect
-      const bgX = -(x * zoomFactor - zoomLens.offsetWidth / 2);
-      const bgY = -(y * zoomFactor - zoomLens.offsetHeight / 2);
-      
-      // Position the lens to follow cursor
-      const lensX = e.clientX - containerRect.left - zoomLens.offsetWidth / 2;
-      const lensY = e.clientY - containerRect.top - zoomLens.offsetHeight / 2;
-      
-      zoomLens.style.left = `${lensX}px`;
-      zoomLens.style.top = `${lensY}px`;
-      zoomLens.style.backgroundPosition = `${bgX}px ${bgY}px`;
-    };
-
-    // Event listeners
-    productImage.addEventListener('mouseenter', () => {
-      if (!zoomLens) createZoomLens();
-      zoomLens.style.display = 'block';
-      productImage.style.cursor = 'crosshair';
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+    
+    closeButton.addEventListener('click', closeModal);
+    
+    document.addEventListener('keydown', function escapeHandler(e) {
+      if (e.key === 'Escape') {
+        closeModal();
+        document.removeEventListener('keydown', escapeHandler);
+      }
     });
 
-    productImage.addEventListener('mousemove', updateZoomLens);
-
-    productImage.addEventListener('mouseleave', () => {
-      if (zoomLens) {
-        zoomLens.style.display = 'none';
-      }
-      productImage.style.cursor = 'default';
+    // Prevent container clicks from closing
+    container.addEventListener('click', (e) => {
+      e.stopPropagation();
     });
   }
 }
