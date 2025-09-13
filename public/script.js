@@ -1,5 +1,63 @@
 class ClubCoastCustomizer {
   constructor() {
+    // Product configuration for Club & Coast Seaside Performance Polos
+    this.PRODUCT_CONFIG = {
+      'CNC-P1000': {
+        name: 'Seaside Performance Polo',
+        description: 'Premium performance polo with UV protection - Navy Men\'s',
+        color: 'Navy',
+        gender: 'Men\'s',
+        colorCode: 'NAVM',
+        image: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/products/CNCP1000.jpg',
+        alt: 'Navy men\'s performance polo'
+      },
+      'CNC-P1001': {
+        name: 'Seaside Performance Polo',
+        description: 'Premium performance polo with UV protection - Navy Women\'s',
+        color: 'Navy',
+        gender: 'Women\'s',
+        colorCode: 'NAVF',
+        image: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/products/CNCP1001.jpg',
+        alt: 'Navy women\'s performance polo'
+      },
+      'CNC-P1002': {
+        name: 'Seaside Performance Polo',
+        description: 'Premium performance polo with UV protection - White Men\'s',
+        color: 'White',
+        gender: 'Men\'s',
+        colorCode: 'WHTM',
+        image: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/products/CNCP1002.jpg',
+        alt: 'White men\'s performance polo'
+      },
+      'CNC-P1003': {
+        name: 'Seaside Performance Polo',
+        description: 'Premium performance polo with UV protection - White Women\'s',
+        color: 'White',
+        gender: 'Women\'s',
+        colorCode: 'WHTF',
+        image: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/products/CNCP1003.jpg',
+        alt: 'White women\'s performance polo'
+      },
+      'CNC-P1004': {
+        name: 'Seaside Performance Polo',
+        description: 'Premium performance polo with UV protection - Blue Men\'s',
+        color: 'Blue',
+        gender: 'Men\'s',
+        colorCode: 'BLUM',
+        image: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/products/CNCP1004.jpg',
+        alt: 'Blue men\'s performance polo'
+      },
+      'CNC-P1005': {
+        name: 'Seaside Performance Polo',
+        description: 'Premium performance polo with UV protection - Blue Women\'s',
+        color: 'Blue',
+        gender: 'Women\'s',
+        colorCode: 'BLUF',
+        image: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/products/CNCP1005.jpg',
+        alt: 'Blue women\'s performance polo'
+      }
+    };
+
     // JWT data from RepSpark (will be populated from URL params)
     this.jwtData = null;
     
@@ -95,34 +153,60 @@ class ClubCoastCustomizer {
         } else {
             console.log('No JWT token found, using demo data');
             this.jwtData = {
-                productNumber: 'CC-POLO-001',
-                productName: 'Classic Performance Polo',
-                productImage: 'https://images.unsplash.com/photo-1581655353564-df123a1eb820?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080'
+                productNumber: 'CNC-P1000',
+                productName: 'Seaside Performance Polo - Navy Men\'s',
+                productImage: this.PRODUCT_CONFIG['CNC-P1000'].image
             };
+            this.updateProductFromJWT();
         }
     } catch (error) {
         console.error('Error parsing JWT:', error);
         // Fallback to demo data
         this.jwtData = {
-            productNumber: 'CC-POLO-001',
-            productName: 'Classic Performance Polo',
-            productImage: 'https://images.unsplash.com/photo-1581655353564-df123a1eb820?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080'
+            productNumber: 'CNC-P1000',
+            productName: 'Seaside Performance Polo - Navy Men\'s',
+            productImage: this.PRODUCT_CONFIG['CNC-P1000'].image
         };
+        this.updateProductFromJWT();
     }
   }
 
   updateProductFromJWT() {
     if (this.jwtData) {
-      // Update product title
-      const titleElement = document.getElementById('product-title');
-      if (titleElement && this.jwtData.productName) {
-        titleElement.textContent = this.jwtData.productName;
-      }
-      
-      // Update product image
-      const imageElement = document.getElementById('product-image');
-      if (imageElement && this.jwtData.productImage) {
-        imageElement.src = this.jwtData.productImage;
+      // Extract product ID from JWT payload
+      const productId = this.jwtData.productNumber || 
+                       this.jwtData.productId || 
+                       this.jwtData.product?.id ||
+                       this.jwtData.product?.productNumber;
+
+      if (productId && this.PRODUCT_CONFIG[productId]) {
+        const product = this.PRODUCT_CONFIG[productId];
+        
+        // Update product title
+        const titleElement = document.getElementById('product-title');
+        if (titleElement) {
+          titleElement.textContent = `${product.name} - ${product.color} ${product.gender}`;
+        }
+        
+        // Update product image
+        const imageElement = document.getElementById('product-image');
+        if (imageElement) {
+          imageElement.src = product.image;
+          imageElement.alt = product.alt;
+        }
+        
+        console.log(`Product updated to: ${product.name} - ${product.color} ${product.gender}`);
+      } else {
+        // Fallback to JWT data or default
+        const titleElement = document.getElementById('product-title');
+        if (titleElement && this.jwtData.productName) {
+          titleElement.textContent = this.jwtData.productName;
+        }
+        
+        const imageElement = document.getElementById('product-image');
+        if (imageElement && this.jwtData.productImage) {
+          imageElement.src = this.jwtData.productImage;
+        }
       }
     }
   }
@@ -331,7 +415,7 @@ class ClubCoastCustomizer {
     const selectedThreadColor = this.threadColors.find(color => color.id === this.state.selectedThreadColor);
 
     const customizationData = {
-      productNumber: this.jwtData?.productNumber || 'CC-POLO-001',
+      productNumber: this.jwtData?.productNumber || 'CNC-P1000',
       customizations: {
         logo: selectedLogo,
         placement: this.state.selectedPlacement,
