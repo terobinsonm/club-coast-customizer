@@ -87,9 +87,10 @@ body {
   object-fit: cover;
 }
 
+/* Updated logo overlay positioning for realistic chest placement */
 .logo-overlay {
   position: absolute;
-  top: 80px;
+  top: 140px; /* Moved down from 80px to chest level */
   width: 48px;
   height: 48px;
   background: rgba(255, 255, 255, 0.9);
@@ -109,12 +110,14 @@ body {
   object-fit: contain;
 }
 
+/* Left chest placement - positioned over right pec area of the image */
 .logo-overlay.left {
-  left: 64px;
+  left: 280px; /* Moved right from 64px to be over the chest */
 }
 
+/* Right chest placement - positioned over left pec area of the image */
 .logo-overlay.right {
-  right: 64px;
+  right: 280px; /* Moved left from 64px to be over the chest */
 }
 
 .logo-overlay.hidden {
@@ -557,3 +560,4 @@ body {
     height: 200px;
   }
 }
+
