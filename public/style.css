@@ -112,12 +112,12 @@ body {
 
 /* Left chest placement - positioned over right pec area of the image */
 .logo-overlay.left {
-  left: 280px; /* Moved right from 64px to be over the chest */
+  left: 230px; /* Moved closer to center for proper chest placement */
 }
 
 /* Right chest placement - positioned over left pec area of the image */
 .logo-overlay.right {
-  right: 280px; /* Moved left from 64px to be over the chest */
+  right: 230px; /* Moved closer to center for proper chest placement */
 }
 
 .logo-overlay.hidden {
@@ -560,4 +560,5 @@ body {
     height: 200px;
   }
 }
+
 
