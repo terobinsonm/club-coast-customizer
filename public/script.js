@@ -483,6 +483,154 @@ class ClubCoastCustomizer {
       threadColor: selectedThreadColor
     };
   }
+
+  // New method to open image zoom modal
+  openImageZoom() {
+    const productImage = document.getElementById('product-image');
+    const logoOverlay = document.getElementById('logo-overlay');
+    
+    if (!productImage) return;
+
+    // Create modal overlay
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+    `;
+
+    // Create container for zoomed content
+    const container = document.createElement('div');
+    container.style.cssText = `
+      position: relative;
+      max-width: 90vw;
+      max-height: 90vh;
+      cursor: default;
+    `;
+
+    // Create zoomed product image
+    const zoomedImage = document.createElement('img');
+    zoomedImage.src = productImage.src;
+    zoomedImage.alt = productImage.alt;
+    zoomedImage.style.cssText = `
+      width: auto;
+      height: auto;
+      max-width: 100%;
+      max-height: 90vh;
+      border-radius: 8px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    `;
+
+    // Clone and scale up the logo overlay if it exists and is visible
+    if (logoOverlay && !logoOverlay.classList.contains('hidden')) {
+      const zoomedLogoOverlay = logoOverlay.cloneNode(true);
+      zoomedLogoOverlay.id = 'zoomed-logo-overlay';
+      
+      // Scale up the logo for zoom view
+      const logoImg = zoomedLogoOverlay.querySelector('img');
+      if (logoImg) {
+        logoImg.style.width = '120px';  // 3x larger than original 40px
+        logoImg.style.height = '90px';  // 3x larger than original 30px
+      }
+      
+      // Position the logo overlay on the zoomed image
+      zoomedLogoOverlay.style.cssText += `
+        position: absolute;
+        pointer-events: none;
+      `;
+      
+      // Apply the same positioning logic but scaled up
+      const placement = this.state.selectedPlacement;
+      if (placement === 'left') {
+        zoomedLogoOverlay.style.left = '15%';
+        zoomedLogoOverlay.style.top = '25%';
+      } else if (placement === 'right') {
+        zoomedLogoOverlay.style.right = '15%';
+        zoomedLogoOverlay.style.top = '25%';
+      } else { // center
+        zoomedLogoOverlay.style.left = '50%';
+        zoomedLogoOverlay.style.top = '30%';
+        zoomedLogoOverlay.style.transform = 'translateX(-50%)';
+      }
+      
+      container.appendChild(zoomedLogoOverlay);
+    }
+
+    // Create close button
+    const closeButton = document.createElement('button');
+    closeButton.innerHTML = '×';
+    closeButton.style.cssText = `
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      width: 40px;
+      height: 40px;
+      border: none;
+      border-radius: 50%;
+      background: white;
+      color: #333;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    `;
+
+    // Add hover effect to close button
+    closeButton.addEventListener('mouseenter', () => {
+      closeButton.style.background = '#f3f4f6';
+    });
+    closeButton.addEventListener('mouseleave', () => {
+      closeButton.style.background = 'white';
+    });
+
+    // Assemble modal
+    container.appendChild(zoomedImage);
+    container.appendChild(closeButton);
+    modal.appendChild(container);
+    document.body.appendChild(modal);
+
+    // Close modal function
+    const closeModal = () => {
+      document.body.removeChild(modal);
+      document.body.style.overflow = ''; // Restore scrolling
+    };
+
+    // Event listeners for closing
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+    closeButton.addEventListener('click', closeModal);
+    
+    // Close on Escape key
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        closeModal();
+        document.removeEventListener('keydown', handleEscape);
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
+
+    // Prevent background scrolling
+    document.body.style.overflow = 'hidden';
+
+    // Prevent container clicks from closing modal
+    container.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+  }
 }
 
 // Initialize the customizer when the page loads
