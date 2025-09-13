@@ -1,94 +1,639 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="frame-ancestors https://app.repspark.com;">
-    <title>Club & Coast Customization</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div class="customizer-wrapper">
-        <div class="customizer-container">
-            <!-- Left Side - Product Image -->
-            <div class="product-side">
-                <div class="product-header">
-                    <h1 id="product-title">Classic performance polo</h1>
-                </div>
-                <div class="product-display">
-                    <div class="product-image-container">
-                        <img id="product-image" src="https://images.unsplash.com/photo-1581655353564-df123a1eb820?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aGl0ZSUyMHBvbG8lMjBzaGlydCUyMHByb2R1Y3R8ZW58MXx8fHwxNzU3Njg3MzMyfDA&ixlib=rb-4.1.0&q=80&w=1080" alt="White polo shirt" />
-                        <div id="logo-overlay" class="logo-overlay hidden"></div>
-                    </div>
-                </div>
-            </div>
+class ClubCoastCustomizer {
+  constructor() {
+    // Product configuration for Club & Coast Seaside Performance Polos
+    this.PRODUCT_CONFIG = {
+      'CNC-P1000': {
+        name: 'Seaside Performance Polo',
+        description: 'Premium performance polo with UV protection - Navy Men\'s',
+        color: 'Navy',
+        gender: 'Men\'s',
+        colorCode: 'NAVM',
+        image: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/products/CNCP1000.jpg',
+        alt: 'Navy men\'s performance polo'
+      },
+      'CNC-P1001': {
+        name: 'Seaside Performance Polo',
+        description: 'Premium performance polo with UV protection - Navy Women\'s',
+        color: 'Navy',
+        gender: 'Women\'s',
+        colorCode: 'NAVF',
+        image: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/products/CNCP1001.jpg',
+        alt: 'Navy women\'s performance polo'
+      },
+      'CNC-P1002': {
+        name: 'Seaside Performance Polo',
+        description: 'Premium performance polo with UV protection - White Men\'s',
+        color: 'White',
+        gender: 'Men\'s',
+        colorCode: 'WHTM',
+        image: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/products/CNCP1002.jpg',
+        alt: 'White men\'s performance polo'
+      },
+      'CNC-P1003': {
+        name: 'Seaside Performance Polo',
+        description: 'Premium performance polo with UV protection - White Women\'s',
+        color: 'White',
+        gender: 'Women\'s',
+        colorCode: 'WHTF',
+        image: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/products/CNCP1003.jpg',
+        alt: 'White women\'s performance polo'
+      },
+      'CNC-P1004': {
+        name: 'Seaside Performance Polo',
+        description: 'Premium performance polo with UV protection - Blue Men\'s',
+        color: 'Blue',
+        gender: 'Men\'s',
+        colorCode: 'BLUM',
+        image: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/products/CNCP1004.jpg',
+        alt: 'Blue men\'s performance polo'
+      },
+      'CNC-P1005': {
+        name: 'Seaside Performance Polo',
+        description: 'Premium performance polo with UV protection - Blue Women\'s',
+        color: 'Blue',
+        gender: 'Women\'s',
+        colorCode: 'BLUF',
+        image: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/products/CNCP1005.jpg',
+        alt: 'Blue women\'s performance polo'
+      }
+    };
 
-            <!-- Right Side - Controls -->
-            <div class="controls-side">
-                <div class="controls-content">
-                    <!-- Logo Selection -->
-                    <div class="control-section">
-                        <label class="control-label">Select logo</label>
-                        
-                        <div class="search-container">
-                            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="11" cy="11" r="8"></circle>
-                                <path d="m21 21-4.35-4.35"></path>
-                            </svg>
-                            <input type="text" id="logo-search" placeholder="Search for logos..." />
-                        </div>
-
-                        <div class="logo-grid" id="logo-grid">
-                            <!-- Logos will be populated by JavaScript -->
-                        </div>
-
-                        <div id="search-results-info" class="search-info hidden"></div>
-                        <div id="no-results" class="no-results hidden">
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-                                <circle cx="11" cy="11" r="8"></circle>
-                                <path d="m21 21-4.35-4.35"></path>
-                            </svg>
-                            <p id="no-results-text">No logos found</p>
-                            <p class="no-results-subtitle">Try a different search term</p>
-                        </div>
-                    </div>
-
-                    <!-- Logo Placement -->
-                    <div class="control-section">
-                        <label class="control-label">Logo placement</label>
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input type="radio" name="placement" value="left" checked />
-                                <span class="radio-custom"></span>
-                                <span>Left chest</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="placement" value="right" />
-                                <span class="radio-custom"></span>
-                                <span>Right chest</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Thread Colors -->
-                    <div class="control-section">
-                        <label class="control-label">Thread color</label>
-                        <div class="thread-color-options" id="thread-color-options">
-                            <!-- Thread color options will be populated by JavaScript -->
-                        </div>
-                    </div>
-
-                <!-- Add to Cart Button -->
-                <div class="cart-button-container">
-                    <button class="add-to-cart-btn" id="add-to-cart">Add to cart</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    // JWT data from RepSpark (will be populated from URL params)
+    this.jwtData = null;
     
-    <script src="script.js"></script>
-</body>
-</html>
+    // All available logos (your current working version)
+    this.allLogos = [
+      { id: '1',  name: 'Kiawah Island Golf Resort',      preview: './images/kiawah.png' },
+      { id: '2',  name: 'Whistling Straits Golf Shop',    preview: './images/whistling-straits.png' },
+      { id: '3',  name: 'Bandon Dunes Golf Resort',       preview: './images/bandon-dunes.png' },
+      { id: '4',  name: 'Augusta National Golf Shop',     preview: './images/augusta.png' },
+      { id: '5',  name: 'Pinehurst Resort',               preview: './images/pinehurst.png' },
+      { id: '6',  name: 'Torrey Pines Golf Course',       preview: './images/torrey-pines.png' },
+      { id: '7',  name: 'TPC Sawgrass',                   preview: './images/tpc-sawgrass.png' },
+    ];
 
+    // Initially displayed logos (first 4)
+    this.initialLogos = this.allLogos.slice(0, 4);
 
+    // Updated thread colors with dynamic color coordination
+    this.threadColors = [
+      { 
+        id: 'club',
+        name: 'Club colors',
+        description: 'Brand-specific thread colors',
+        swatches: ['#1f2937', '#dc2626', '#2563eb', '#059669'],
+        logoStyle: {
+          filter: 'none'
+        }
+      },
+      { 
+        id: 'coordinated',
+        name: 'Coordinated',
+        description: 'Complementary color palette',
+        swatches: ['#4f46e5', '#06b6d4', '#10b981', '#f59e0b'], // Will be updated dynamically
+        logoStyle: {
+          filter: 'hue-rotate(45deg) saturate(1.2)'
+        }
+      },
+      { 
+        id: 'tonal',
+        name: 'Tonal',
+        description: 'Matching shirt color tones',
+        swatches: ['#f9fafb', '#e5e7eb', '#9ca3af', '#6b7280'],
+        logoStyle: {
+          filter: 'grayscale(0.8) contrast(1.1)'
+        }
+      },
+    ];
 
+    // Current state
+    this.state = {
+      selectedLogo: '1',
+      selectedPlacement: 'left',
+      selectedThreadColor: 'club',
+      logoSearchQuery: '',
+    };
+
+    this.init();
+  }
+
+  init() {
+    this.parseJWTFromURL();
+    this.renderLogos();
+    this.renderThreadColors();
+    this.bindEvents();
+    this.updateLogoOverlay();
+    console.log('Club & Coast Customizer initialized');
+  }
+
+  parseJWTFromURL() {
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        
+        if (token) {
+            console.log('Raw token received:', token);
+            
+            // Split the JWT into parts
+            const parts = token.split('.');
+            if (parts.length !== 3) {
+                throw new Error('Invalid JWT format');
+            }
+            
+            // Decode the payload (second part)
+            const payload = parts[1];
+            // Add padding if needed
+            const paddedPayload = payload + '='.repeat((4 - payload.length % 4) % 4);
+            
+            this.jwtData = JSON.parse(atob(paddedPayload));
+            console.log('JWT Data received:', this.jwtData);
+            
+            this.updateProductFromJWT();
+        } else {
+            console.log('No JWT token found, using demo data');
+            this.jwtData = {
+                productNumber: 'CNC-P1000',
+                productName: 'Seaside Performance Polo - Navy Men\'s',
+                productImage: this.PRODUCT_CONFIG['CNC-P1000'].image
+            };
+            this.updateProductFromJWT();
+        }
+    } catch (error) {
+        console.error('Error parsing JWT:', error);
+        // Fallback to demo data
+        this.jwtData = {
+            productNumber: 'CNC-P1000',
+            productName: 'Seaside Performance Polo - Navy Men\'s',
+            productImage: this.PRODUCT_CONFIG['CNC-P1000'].image
+        };
+        this.updateProductFromJWT();
+    }
+  }
+
+  // Updated method to get color-coordinated palette AND filter effects
+  getCoordinatedColors(productColor) {
+    const colorConfig = {
+      'Navy': {
+        swatches: ['#1e3a8a', '#3b82f6', '#60a5fa', '#93c5fd'],
+        filter: 'hue-rotate(15deg) saturate(1.1) brightness(0.9)' // Subtle blue shift
+      },
+      'Blue': {
+        swatches: ['#1e40af', '#2563eb', '#3b82f6', '#60a5fa'],
+        filter: 'hue-rotate(10deg) saturate(1.2) brightness(0.95)' // Slight blue enhancement
+      },
+      'White': {
+        swatches: ['#374151', '#6b7280', '#9ca3af', '#d1d5db'],
+        filter: 'saturate(0.4) brightness(0.85) contrast(1.1)' // Muted/gray tones
+      }
+    };
+    
+    return colorConfig[productColor] || {
+      swatches: ['#4f46e5', '#06b6d4', '#10b981', '#f59e0b'],
+      filter: 'hue-rotate(10deg) saturate(1.1)'
+    };
+  }
+
+  // Updated updateProductFromJWT to update both swatches AND filter effects
+  updateProductFromJWT() {
+    if (this.jwtData) {
+      // Extract product ID from JWT payload
+      const productId = this.jwtData.productNumber || 
+                       this.jwtData.productId || 
+                       this.jwtData.product?.id ||
+                       this.jwtData.product?.productNumber;
+
+      if (productId && this.PRODUCT_CONFIG[productId]) {
+        const product = this.PRODUCT_CONFIG[productId];
+        
+        // Update coordinated thread color swatches AND filter based on product color
+        const coordinatedOption = this.threadColors.find(color => color.id === 'coordinated');
+        if (coordinatedOption) {
+          const colorConfig = this.getCoordinatedColors(product.color);
+          coordinatedOption.swatches = colorConfig.swatches;
+          coordinatedOption.logoStyle.filter = colorConfig.filter;
+        }
+        
+        // Update product title
+        const titleElement = document.getElementById('product-title');
+        if (titleElement) {
+          titleElement.textContent = `${product.name} - ${product.color} ${product.gender}`;
+        }
+        
+        // Update product image
+        const imageElement = document.getElementById('product-image');
+        if (imageElement) {
+          imageElement.src = product.image;
+          imageElement.alt = product.alt;
+        }
+        
+        // Re-render thread colors to show updated swatches
+        this.renderThreadColors();
+        
+        // Update logo overlay if coordinated is currently selected
+        if (this.state.selectedThreadColor === 'coordinated') {
+          this.updateLogoOverlay();
+        }
+        
+        console.log(`Product updated to: ${product.name} - ${product.color} ${product.gender}`);
+      } else {
+        // Fallback to JWT data or default
+        const titleElement = document.getElementById('product-title');
+        if (titleElement && this.jwtData.productName) {
+          titleElement.textContent = this.jwtData.productName;
+        }
+        
+        const imageElement = document.getElementById('product-image');
+        if (imageElement && this.jwtData.productImage) {
+          imageElement.src = this.jwtData.productImage;
+        }
+      }
+    }
+  }
+
+  renderLogos() {
+    const logoGrid = document.getElementById('logo-grid');
+    const filteredLogos = this.getFilteredLogos();
+
+    if (filteredLogos.length === 0) {
+      this.showNoResults();
+      return;
+    }
+
+    this.hideNoResults();
+    this.updateSearchInfo(filteredLogos.length);
+
+    logoGrid.innerHTML = filteredLogos.map(logo => `
+      <button class="logo-option ${this.state.selectedLogo === logo.id ? 'selected' : ''}"
+              data-logo="${logo.id}" type="button" aria-label="${logo.name}">
+        <img class="logo-preview-img" src="${logo.preview}" alt="${logo.name}" loading="lazy"
+             onerror="this.onerror=null; this.src='./images/fallback.png';">
+        <span class="logo-name">${logo.name}</span>
+      </button>
+    `).join('');
+
+    // Add click handlers
+    logoGrid.querySelectorAll('.logo-option').forEach(option => {
+      option.addEventListener('click', () => {
+        const logoId = option.dataset.logo;
+        this.selectLogo(logoId);
+      });
+    });
+  }
+
+  renderThreadColors() {
+    const container = document.getElementById('thread-color-options');
+    
+    container.innerHTML = this.threadColors.map(colorOption => `
+      <button class="thread-color-option ${this.state.selectedThreadColor === colorOption.id ? 'selected' : ''}" 
+              data-color="${colorOption.id}">
+        <div class="thread-color-header">
+          <div class="thread-color-info">
+            <div class="thread-color-name">${colorOption.name}</div>
+            <div class="thread-color-desc">${colorOption.description}</div>
+          </div>
+          <div class="thread-color-indicator ${this.state.selectedThreadColor === colorOption.id ? '' : 'hidden'}"></div>
+        </div>
+        <div class="thread-color-swatches">
+          ${colorOption.swatches.map(swatch => 
+            `<div class="color-swatch" style="background-color: ${swatch};"></div>`
+          ).join('')}
+        </div>
+      </button>
+    `).join('');
+
+    // Add click handlers
+    container.querySelectorAll('.thread-color-option').forEach(option => {
+      option.addEventListener('click', () => {
+        const colorId = option.dataset.color;
+        this.selectThreadColor(colorId);
+      });
+    });
+  }
+
+  getFilteredLogos() {
+    if (!this.state.logoSearchQuery.trim()) {
+      return this.initialLogos;
+    }
+    return this.allLogos.filter(logo =>
+      logo.name.toLowerCase().includes(this.state.logoSearchQuery.toLowerCase())
+    );
+  }
+
+  showNoResults() {
+    const logoGrid = document.getElementById('logo-grid');
+    const noResults = document.getElementById('no-results');
+    const searchInfo = document.getElementById('search-results-info');
+    const noResultsText = document.getElementById('no-results-text');
+
+    logoGrid.style.display = 'none';
+    noResults.classList.remove('hidden');
+    searchInfo.classList.add('hidden');
+    noResultsText.textContent = `No logos found matching "${this.state.logoSearchQuery}"`;
+  }
+
+  hideNoResults() {
+    const logoGrid = document.getElementById('logo-grid');
+    const noResults = document.getElementById('no-results');
+
+    logoGrid.style.display = 'grid';
+    noResults.classList.add('hidden');
+  }
+
+  updateSearchInfo(count) {
+    const searchInfo = document.getElementById('search-results-info');
+    if (this.state.logoSearchQuery.trim() && count > 0) {
+      searchInfo.textContent = `Showing ${count} of ${this.allLogos.length} logos`;
+      searchInfo.classList.remove('hidden');
+    } else {
+      searchInfo.classList.add('hidden');
+    }
+  }
+
+  bindEvents() {
+    // Logo search
+    const searchInput = document.getElementById('logo-search');
+    searchInput.addEventListener('input', (e) => {
+      this.state.logoSearchQuery = e.target.value;
+      this.renderLogos();
+    });
+
+    // Placement radio buttons
+    document.querySelectorAll('input[name="placement"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        this.state.selectedPlacement = e.target.value;
+        this.updateLogoOverlay();
+      });
+    });
+
+    // Add to cart
+    document.getElementById('add-to-cart').addEventListener('click', () => {
+      this.addToCart();
+    });
+  }
+
+  selectLogo(logoId) {
+    this.state.selectedLogo = logoId;
+
+    // Update logo selection visual state
+    document.querySelectorAll('.logo-option').forEach(option => {
+      option.classList.toggle('selected', option.dataset.logo === logoId);
+    });
+
+    this.updateLogoOverlay();
+  }
+
+  // Fixed selectThreadColor method
+  selectThreadColor(colorId) {
+    this.state.selectedThreadColor = colorId;
+
+    // Update thread color selection visual state
+    document.querySelectorAll('.thread-color-option').forEach(option => {
+      const isSelected = option.dataset.color === colorId;
+      option.classList.toggle('selected', isSelected);
+
+      const indicator = option.querySelector('.thread-color-indicator');
+      indicator.classList.toggle('hidden', !isSelected);
+    });
+
+    // Update logo overlay to reflect new thread color
+    this.updateLogoOverlay();
+  }
+
+  // Updated updateLogoOverlay method - removed borders and backgrounds
+  updateLogoOverlay() {
+    const overlay = document.getElementById('logo-overlay');
+    const selectedLogo = this.allLogos.find(logo => logo.id === this.state.selectedLogo);
+    const selectedThreadColor = this.threadColors.find(color => color.id === this.state.selectedThreadColor);
+
+    if (selectedLogo) {
+      overlay.innerHTML = '';
+
+      if (/\.(png|jpg|jpeg|svg)$/i.test(selectedLogo.preview)) {
+        const img = document.createElement('img');
+        img.src = selectedLogo.preview;
+        img.alt = selectedLogo.name;
+        img.style.width = '40px';
+        img.style.height = '30px';
+        img.style.objectFit = 'contain';
+        
+        // Apply only filter effects - no borders or backgrounds
+        if (selectedThreadColor && selectedThreadColor.logoStyle) {
+          img.style.filter = selectedThreadColor.logoStyle.filter;
+        } else {
+          img.style.filter = 'none';
+        }
+        
+        // Reset overlay styling to transparent
+        overlay.style.border = 'none';
+        overlay.style.backgroundColor = 'transparent';
+        overlay.style.padding = '0';
+        
+        img.onerror = () => { 
+          img.remove(); 
+          overlay.textContent = selectedLogo.name; 
+        };
+        overlay.appendChild(img);
+      } else {
+        overlay.textContent = selectedLogo.preview;
+      }
+
+      overlay.className = `logo-overlay ${this.state.selectedPlacement}`;
+      overlay.classList.remove('hidden');
+    } else {
+      overlay.classList.add('hidden');
+    }
+  }
+
+  addToCart() {
+    const selectedLogo = this.allLogos.find(logo => logo.id === this.state.selectedLogo);
+    const selectedThreadColor = this.threadColors.find(color => color.id === this.state.selectedThreadColor);
+
+    const customizationData = {
+      productNumber: this.jwtData?.productNumber || 'CNC-P1000',
+      customizations: {
+        logo: selectedLogo,
+        placement: this.state.selectedPlacement,
+        threadColor: selectedThreadColor
+      },
+      timestamp: new Date().toISOString()
+    };
+
+    console.log('Sending customization data back to RepSpark:', customizationData);
+
+    // Send data back to RepSpark parent window
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        action: 'SAVE',
+        payload: customizationData
+      }, 'https://app.repspark.com');
+    } else {
+      // Demo mode - show alert (removed quantity from alert)
+      alert(`Added to cart!\n\nLogo: ${selectedLogo.name}\nPlacement: ${this.state.selectedPlacement} chest\nThread Color: ${selectedThreadColor.name}`);
+    }
+  }
+
+  // Method to get current customization state (for RepSpark integration)
+  getCustomizationState() {
+    const selectedLogo = this.allLogos.find(logo => logo.id === this.state.selectedLogo);
+    const selectedThreadColor = this.threadColors.find(color => color.id === this.state.selectedThreadColor);
+
+    return {
+      selectedLogo,
+      placement: this.state.selectedPlacement,
+      threadColor: selectedThreadColor
+    };
+  }
+
+  // New method to open image zoom modal
+  openImageZoom() {
+    const productImage = document.getElementById('product-image');
+    const logoOverlay = document.getElementById('logo-overlay');
+    
+    if (!productImage) return;
+
+    // Create modal overlay
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+    `;
+
+    // Create container for zoomed content
+    const container = document.createElement('div');
+    container.style.cssText = `
+      position: relative;
+      max-width: 90vw;
+      max-height: 90vh;
+      cursor: default;
+    `;
+
+    // Create zoomed product image
+    const zoomedImage = document.createElement('img');
+    zoomedImage.src = productImage.src;
+    zoomedImage.alt = productImage.alt;
+    zoomedImage.style.cssText = `
+      width: auto;
+      height: auto;
+      max-width: 100%;
+      max-height: 90vh;
+      border-radius: 8px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    `;
+
+    // Clone and scale up the logo overlay if it exists and is visible
+    if (logoOverlay && !logoOverlay.classList.contains('hidden')) {
+      const zoomedLogoOverlay = logoOverlay.cloneNode(true);
+      zoomedLogoOverlay.id = 'zoomed-logo-overlay';
+      
+      // Scale up the logo for zoom view
+      const logoImg = zoomedLogoOverlay.querySelector('img');
+      if (logoImg) {
+        logoImg.style.width = '120px';  // 3x larger than original 40px
+        logoImg.style.height = '90px';  // 3x larger than original 30px
+      }
+      
+      // Position the logo overlay on the zoomed image
+      zoomedLogoOverlay.style.cssText += `
+        position: absolute;
+        pointer-events: none;
+      `;
+      
+      // Apply the same positioning logic but scaled up
+      const placement = this.state.selectedPlacement;
+      if (placement === 'left') {
+        zoomedLogoOverlay.style.left = '15%';
+        zoomedLogoOverlay.style.top = '25%';
+      } else if (placement === 'right') {
+        zoomedLogoOverlay.style.right = '15%';
+        zoomedLogoOverlay.style.top = '25%';
+      } else { // center
+        zoomedLogoOverlay.style.left = '50%';
+        zoomedLogoOverlay.style.top = '30%';
+        zoomedLogoOverlay.style.transform = 'translateX(-50%)';
+      }
+      
+      container.appendChild(zoomedLogoOverlay);
+    }
+
+    // Create close button
+    const closeButton = document.createElement('button');
+    closeButton.innerHTML = '×';
+    closeButton.style.cssText = `
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      width: 40px;
+      height: 40px;
+      border: none;
+      border-radius: 50%;
+      background: white;
+      color: #333;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    `;
+
+    // Add hover effect to close button
+    closeButton.addEventListener('mouseenter', () => {
+      closeButton.style.background = '#f3f4f6';
+    });
+    closeButton.addEventListener('mouseleave', () => {
+      closeButton.style.background = 'white';
+    });
+
+    // Assemble modal
+    container.appendChild(zoomedImage);
+    container.appendChild(closeButton);
+    modal.appendChild(container);
+    document.body.appendChild(modal);
+
+    // Close modal function
+    const closeModal = () => {
+      document.body.removeChild(modal);
+      document.body.style.overflow = ''; // Restore scrolling
+    };
+
+    // Event listeners for closing
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+    closeButton.addEventListener('click', closeModal);
+    
+    // Close on Escape key
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        closeModal();
+        document.removeEventListener('keydown', handleEscape);
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
+
+    // Prevent background scrolling
+    document.body.style.overflow = 'hidden';
+
+    // Prevent container clicks from closing modal
+    container.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+  }
+}
+
+// Initialize the customizer when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+  new ClubCoastCustomizer();
+});
