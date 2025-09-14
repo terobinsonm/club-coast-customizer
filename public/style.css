@@ -87,21 +87,30 @@ body {
   object-fit: cover;
 }
 
-/* Updated logo overlay positioning for realistic chest placement */
+/* NEW: Zoom wrapper styles for improved zoom functionality */
+#zoom-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-origin: center center;
+  transition: transform 0.3s ease-out;
+}
+
+/* UPDATED: Logo overlay positioning for realistic chest placement */
 .logo-overlay {
   position: absolute;
-  top: 140px; /* Moved down from 80px to chest level */
+  top: 140px; /* Positioned at chest level */
   width: 48px;
   height: 48px;
-  background: transparent; /* Removed white background */
+  background: transparent; /* No background for realistic appearance */
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   font-size: 18px;
-  transition: all 0.3s ease;
-  border: none; /* Removed border since there's no background */
+  border: none; /* No border for clean look */
+  /* Note: No transition here since wrapper handles transforms */
 }
 
 .logo-overlay img {
@@ -112,12 +121,12 @@ body {
 
 /* Left chest placement - positioned over right pec area of the image */
 .logo-overlay.left {
-  left: 245px; /* Moved closer to center for proper chest placement */
+  left: 245px; /* Positioned for proper chest placement */
 }
 
 /* Right chest placement - positioned over left pec area of the image */
 .logo-overlay.right {
-  right: 245px; /* Moved closer to center for proper chest placement */
+  right: 245px; /* Positioned for proper chest placement */
 }
 
 .logo-overlay.hidden {
@@ -560,8 +569,3 @@ body {
     height: 200px;
   }
 }
-
-
-
-
-
