@@ -529,6 +529,12 @@ class ClubCoastCustomizer {
 
       overlay.className = `logo-overlay ${this.state.selectedPlacement}`;
       overlay.classList.remove('hidden');
+      
+      // Always ensure logo is in the zoom wrapper
+      const zoomWrapper = document.getElementById('zoom-wrapper');
+      if (zoomWrapper && overlay.parentElement !== zoomWrapper) {
+        zoomWrapper.appendChild(overlay);
+      }
     } else {
       overlay.classList.add('hidden');
     }
