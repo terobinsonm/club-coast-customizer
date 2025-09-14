@@ -188,11 +188,12 @@ class ClubCoastCustomizer {
       if (this.isZoomed) {
         const rect = imageContainer.getBoundingClientRect();
         const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-        
+      
+        // Reset logo pointer events
+const logoOverlay = document.getElementById('logo-overlay');
+if (logoOverlay) {
+  logoOverlay.style.pointerEvents = 'auto';
+}
         // Calculate transform based on mouse position
         const moveX = (centerX - x) * 0.3; // Reduced multiplier for smoother pan
         const moveY = (centerY - y) * 0.3;
@@ -200,6 +201,11 @@ class ClubCoastCustomizer {
         // Apply transform to wrapper (affects both image and logo)
         zoomWrapper.style.transform = `scale(2) translate(${moveX}px, ${moveY}px)`;
       }
+      // ALWAYS ensure the logo is in the zoom wrapper
+const zoomWrapper = document.getElementById('zoom-wrapper');
+if (zoomWrapper && overlay.parentElement !== zoomWrapper) {
+  zoomWrapper.appendChild(overlay);
+}
     };
 
     // Mouse leave - reset zoom
@@ -587,3 +593,4 @@ class ClubCoastCustomizer {
 document.addEventListener('DOMContentLoaded', () => {
   new ClubCoastCustomizer();
 });
+
