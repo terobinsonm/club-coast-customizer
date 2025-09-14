@@ -439,7 +439,7 @@ class ClubCoastCustomizer {
         
         const titleElement = document.getElementById('product-title');
         if (titleElement) {
-          titleElement.textContent = `${product.name} - ${product.color} ${product.gender}`;
+          titleElement.textContent = `${product.gender} ${product.name} - ${product.color}`;
         }
         
         const imageElement = document.getElementById('product-image');
