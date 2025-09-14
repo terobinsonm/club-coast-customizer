@@ -117,119 +117,241 @@ class ClubCoastCustomizer {
     // Zoom state
     this.isZoomed = false;
 
+    // RepSpark integration state
+    this.isEmbedded = false;
+    this.repsparkOrigin = 'https://app.repspark.com';
+
     this.init();
   }
 
   init() {
+    this.detectEmbeddedEnvironment();
+    this.setupRepSparkMessageListener();
     this.parseJWTFromURL();
     this.renderLogos();
     this.renderThreadColors();
     this.bindEvents();
-    this.setupProductImageZoom(); // Initialize zoom functionality
+    this.setupProductImageZoom();
     this.updateLogoOverlay();
     console.log('Club & Coast Customizer initialized');
   }
 
-  // NEW IMPROVED ZOOM IMPLEMENTATION
-  setupProductImageZoom() {
-    const productImage = document.getElementById('product-image');
-    const imageContainer = productImage.parentElement;
+  // NEW: Detect if running in RepSpark iframe
+  detectEmbeddedEnvironment() {
+    this.isEmbedded = window.parent && window.parent !== window;
+    if (this.isEmbedded) {
+      console.log('Running in embedded RepSpark environment');
+      // Send ready message to RepSpark
+      this.sendMessageToRepSpark('READY', { ready: true });
+    }
+  }
+
+  // NEW: RepSpark PostMessage listener
+  setupRepSparkMessageListener() {
+    window.addEventListener('message', (event) => {
+      // Verify origin for security
+      if (event.origin !== this.repsparkOrigin) {
+        console.warn('Received message from unauthorized origin:', event.origin);
+        return;
+      }
+
+      console.log('Received message from RepSpark:', event.data);
+
+      try {
+        switch (event.data.action) {
+          case 'LOAD':
+            this.loadSavedCustomizations(event.data.payload);
+            break;
+          case 'RESET':
+            this.resetCustomizations();
+            break;
+          case 'VALIDATE':
+            this.validateAndRespond();
+            break;
+          case 'GET_STATE':
+            this.sendCurrentState();
+            break;
+          default:
+            console.log('Unknown action received from RepSpark:', event.data.action);
+        }
+      } catch (error) {
+        console.error('Error handling RepSpark message:', error);
+        this.sendMessageToRepSpark('ERROR', { 
+          message: error.message,
+          action: event.data.action 
+        });
+      }
+    });
+  }
+
+  // NEW: Load saved customizations from RepSpark
+  loadSavedCustomizations(savedData) {
+    if (!savedData || !savedData.customizations) {
+      console.log('No saved customizations to load');
+      return;
+    }
+
+    console.log('Loading saved customizations:', savedData);
     
-    if (!productImage) return;
+    const { customizations } = savedData;
+    
+    // Update state with saved values
+    if (customizations.logo && customizations.logo.id) {
+      this.state.selectedLogo = customizations.logo.id;
+    }
+    if (customizations.placement) {
+      this.state.selectedPlacement = customizations.placement;
+    }
+    if (customizations.threadColor && customizations.threadColor.id) {
+      this.state.selectedThreadColor = customizations.threadColor.id;
+    }
+    
+    // Update UI to reflect loaded state
+    this.updateUIFromState();
+    this.updateLogoOverlay();
+    
+    console.log('Customizations loaded successfully');
+  }
 
-    // Create a wrapper that will contain both image and logo
-    const zoomWrapper = document.createElement('div');
-    zoomWrapper.id = 'zoom-wrapper';
-    zoomWrapper.style.cssText = `
-      position: relative;
-      width: 100%;
-      height: 100%;
-      transform-origin: center center;
-      transition: transform 0.3s ease-out;
-    `;
-
-    // Move the image into the wrapper
-    const parent = productImage.parentNode;
-    parent.insertBefore(zoomWrapper, productImage);
-    zoomWrapper.appendChild(productImage);
-
-    // Set up container for zoom
-    imageContainer.style.position = 'relative';
-    imageContainer.style.overflow = 'hidden';
-
-    // Reset image styles since wrapper handles transforms
-    productImage.style.width = '100%';
-    productImage.style.height = '100%';
-    productImage.style.objectFit = 'cover';
-    productImage.style.cursor = 'zoom-in';
-    productImage.title = 'Hover to zoom and explore details';
-
-    // Mouse enter - start zoom
-    const handleMouseEnter = (e) => {
-      if (!this.isZoomed) {
-        this.isZoomed = true;
-        
-        // Move logo to wrapper if it exists and is visible
-        const logoOverlay = document.getElementById('logo-overlay');
-        if (logoOverlay && !logoOverlay.classList.contains('hidden')) {
-          zoomWrapper.appendChild(logoOverlay);
-          logoOverlay.style.pointerEvents = 'none';
-        }
-        
-        // Scale the entire wrapper (image + logo together)
-        zoomWrapper.style.transform = 'scale(2)';
-        productImage.style.cursor = 'zoom-out';
-        zoomWrapper.style.zIndex = '100';
-      }
+  // NEW: Reset customizations to defaults
+  resetCustomizations() {
+    console.log('Resetting customizations to defaults');
+    
+    this.state = {
+      selectedLogo: '1',
+      selectedPlacement: 'left',
+      selectedThreadColor: 'club',
+      logoSearchQuery: '',
     };
+    
+    // Clear search
+    const searchInput = document.getElementById('logo-search');
+    if (searchInput) searchInput.value = '';
+    
+    // Update UI
+    this.updateUIFromState();
+    this.renderLogos();
+    this.updateLogoOverlay();
+    
+    console.log('Customizations reset');
+    
+    // Notify RepSpark of reset
+    this.sendMessageToRepSpark('RESET_COMPLETE', { 
+      state: this.getCustomizationState() 
+    });
+  }
 
-    // Mouse move - follow cursor for pan effect
-    const handleMouseMove = (e) => {
-      if (this.isZoomed) {
-        const rect = imageContainer.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-        
-        // Calculate transform based on mouse position
-        const moveX = (centerX - x) * 0.3; // Reduced multiplier for smoother pan
-        const moveY = (centerY - y) * 0.3;
-        
-        // Apply transform to wrapper (affects both image and logo)
-        zoomWrapper.style.transform = `scale(2) translate(${moveX}px, ${moveY}px)`;
-      }
-    };
+  // NEW: Update UI elements from current state
+  updateUIFromState() {
+    // Update logo selection
+    document.querySelectorAll('.logo-option').forEach(option => {
+      option.classList.toggle('selected', option.dataset.logo === this.state.selectedLogo);
+    });
 
-    // Mouse leave - reset zoom
-    const handleMouseLeave = (e) => {
-      const rect = imageContainer.getBoundingClientRect();
-      const x = e.clientX;
-      const y = e.clientY;
+    // Update placement radio buttons
+    document.querySelectorAll('input[name="placement"]').forEach(radio => {
+      radio.checked = radio.value === this.state.selectedPlacement;
+    });
+
+    // Update thread color selection
+    document.querySelectorAll('.thread-color-option').forEach(option => {
+      const isSelected = option.dataset.color === this.state.selectedThreadColor;
+      option.classList.toggle('selected', isSelected);
       
-      if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
-        if (this.isZoomed) {
-          this.isZoomed = false;
-          
-          // Reset wrapper transform
-          zoomWrapper.style.transform = 'scale(1)';
-          productImage.style.cursor = 'zoom-in';
-          zoomWrapper.style.zIndex = '1';
-          
-          // Reset logo pointer events only
-          const logoOverlay = document.getElementById('logo-overlay');
-          if (logoOverlay) {
-            logoOverlay.style.pointerEvents = 'auto';
-          }
-        }
+      const indicator = option.querySelector('.thread-color-indicator');
+      if (indicator) {
+        indicator.classList.toggle('hidden', !isSelected);
       }
-    };
+    });
+  }
 
-    // Add event listeners to the container for better coverage
-    imageContainer.addEventListener('mouseenter', handleMouseEnter);
-    imageContainer.addEventListener('mousemove', handleMouseMove);
-    imageContainer.addEventListener('mouseleave', handleMouseLeave);
+  // NEW: Validate customizations and respond to RepSpark
+  validateAndRespond() {
+    const validation = this.validateCustomizations();
+    
+    this.sendMessageToRepSpark('VALIDATION_RESULT', {
+      isValid: validation.isValid,
+      errors: validation.errors,
+      state: this.getCustomizationState()
+    });
+  }
+
+  // NEW: Send current state to RepSpark
+  sendCurrentState() {
+    this.sendMessageToRepSpark('CURRENT_STATE', {
+      state: this.getCustomizationState(),
+      isValid: this.validateCustomizations().isValid
+    });
+  }
+
+  // NEW: Comprehensive validation
+  validateCustomizations() {
+    const errors = [];
+    
+    if (!this.state.selectedLogo) {
+      errors.push('Logo selection is required');
+    }
+    
+    if (!this.state.selectedPlacement) {
+      errors.push('Logo placement is required');
+    }
+    
+    if (!this.state.selectedThreadColor) {
+      errors.push('Thread color selection is required');
+    }
+
+    // Validate that selected items exist
+    const selectedLogo = this.allLogos.find(logo => logo.id === this.state.selectedLogo);
+    if (this.state.selectedLogo && !selectedLogo) {
+      errors.push('Selected logo is no longer available');
+    }
+
+    const selectedThreadColor = this.threadColors.find(color => color.id === this.state.selectedThreadColor);
+    if (this.state.selectedThreadColor && !selectedThreadColor) {
+      errors.push('Selected thread color is no longer available');
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors: errors
+    };
+  }
+
+  // NEW: Send messages to RepSpark with error handling
+  sendMessageToRepSpark(action, payload) {
+    if (!this.isEmbedded) {
+      console.log('Not embedded - would send to RepSpark:', { action, payload });
+      return;
+    }
+
+    try {
+      const message = {
+        action: action,
+        payload: payload,
+        timestamp: new Date().toISOString(),
+        success: true
+      };
+
+      window.parent.postMessage(message, this.repsparkOrigin);
+      console.log('Sent message to RepSpark:', message);
+    } catch (error) {
+      console.error('Failed to send message to RepSpark:', error);
+      
+      // Send error message
+      try {
+        window.parent.postMessage({
+          action: 'ERROR',
+          payload: { 
+            message: error.message,
+            originalAction: action 
+          },
+          success: false,
+          timestamp: new Date().toISOString()
+        }, this.repsparkOrigin);
+      } catch (secondError) {
+        console.error('Failed to send error message to RepSpark:', secondError);
+      }
+    }
   }
 
   parseJWTFromURL() {
@@ -457,6 +579,13 @@ class ClubCoastCustomizer {
       radio.addEventListener('change', (e) => {
         this.state.selectedPlacement = e.target.value;
         this.updateLogoOverlay();
+        // Notify RepSpark of state change
+        if (this.isEmbedded) {
+          this.sendMessageToRepSpark('STATE_CHANGED', {
+            state: this.getCustomizationState(),
+            field: 'placement'
+          });
+        }
       });
     });
 
@@ -474,6 +603,14 @@ class ClubCoastCustomizer {
     });
 
     this.updateLogoOverlay();
+    
+    // Notify RepSpark of state change
+    if (this.isEmbedded) {
+      this.sendMessageToRepSpark('STATE_CHANGED', {
+        state: this.getCustomizationState(),
+        field: 'logo'
+      });
+    }
   }
 
   selectThreadColor(colorId) {
@@ -488,6 +625,116 @@ class ClubCoastCustomizer {
     });
 
     this.updateLogoOverlay();
+    
+    // Notify RepSpark of state change
+    if (this.isEmbedded) {
+      this.sendMessageToRepSpark('STATE_CHANGED', {
+        state: this.getCustomizationState(),
+        field: 'threadColor'
+      });
+    }
+  }
+
+  // NEW IMPROVED ZOOM IMPLEMENTATION
+  setupProductImageZoom() {
+    const productImage = document.getElementById('product-image');
+    const imageContainer = productImage.parentElement;
+    
+    if (!productImage) return;
+
+    // Create a wrapper that will contain both image and logo
+    const zoomWrapper = document.createElement('div');
+    zoomWrapper.id = 'zoom-wrapper';
+    zoomWrapper.style.cssText = `
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-origin: center center;
+      transition: transform 0.3s ease-out;
+    `;
+
+    // Move the image into the wrapper
+    const parent = productImage.parentNode;
+    parent.insertBefore(zoomWrapper, productImage);
+    zoomWrapper.appendChild(productImage);
+
+    // Set up container for zoom
+    imageContainer.style.position = 'relative';
+    imageContainer.style.overflow = 'hidden';
+
+    // Reset image styles since wrapper handles transforms
+    productImage.style.width = '100%';
+    productImage.style.height = '100%';
+    productImage.style.objectFit = 'cover';
+    productImage.style.cursor = 'zoom-in';
+    productImage.title = 'Hover to zoom and explore details';
+
+    // Mouse enter - start zoom
+    const handleMouseEnter = (e) => {
+      if (!this.isZoomed) {
+        this.isZoomed = true;
+        
+        // Move logo to wrapper if it exists and is visible
+        const logoOverlay = document.getElementById('logo-overlay');
+        if (logoOverlay && !logoOverlay.classList.contains('hidden')) {
+          zoomWrapper.appendChild(logoOverlay);
+          logoOverlay.style.pointerEvents = 'none';
+        }
+        
+        // Scale the entire wrapper (image + logo together)
+        zoomWrapper.style.transform = 'scale(2)';
+        productImage.style.cursor = 'zoom-out';
+        zoomWrapper.style.zIndex = '100';
+      }
+    };
+
+    // Mouse move - follow cursor for pan effect
+    const handleMouseMove = (e) => {
+      if (this.isZoomed) {
+        const rect = imageContainer.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
+        // Calculate transform based on mouse position
+        const moveX = (centerX - x) * 0.3; // Reduced multiplier for smoother pan
+        const moveY = (centerY - y) * 0.3;
+        
+        // Apply transform to wrapper (affects both image and logo)
+        zoomWrapper.style.transform = `scale(2) translate(${moveX}px, ${moveY}px)`;
+      }
+    };
+
+    // Mouse leave - reset zoom
+    const handleMouseLeave = (e) => {
+      const rect = imageContainer.getBoundingClientRect();
+      const x = e.clientX;
+      const y = e.clientY;
+      
+      if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+        if (this.isZoomed) {
+          this.isZoomed = false;
+          
+          // Reset wrapper transform
+          zoomWrapper.style.transform = 'scale(1)';
+          productImage.style.cursor = 'zoom-in';
+          zoomWrapper.style.zIndex = '1';
+          
+          // Reset logo pointer events only
+          const logoOverlay = document.getElementById('logo-overlay');
+          if (logoOverlay) {
+            logoOverlay.style.pointerEvents = 'auto';
+          }
+        }
+      }
+    };
+
+    // Add event listeners to the container for better coverage
+    imageContainer.addEventListener('mouseenter', handleMouseEnter);
+    imageContainer.addEventListener('mousemove', handleMouseMove);
+    imageContainer.addEventListener('mouseleave', handleMouseLeave);
   }
 
   // UPDATED LOGO OVERLAY METHOD
@@ -539,7 +786,17 @@ class ClubCoastCustomizer {
     }
   }
 
+  // ENHANCED ADD TO CART WITH FULL REPSPARK INTEGRATION
   addToCart() {
+    // Validate before proceeding
+    const validation = this.validateCustomizations();
+    
+    if (!validation.isValid) {
+      // Show validation errors to user
+      alert('Please complete your customization:\n' + validation.errors.join('\n'));
+      return;
+    }
+
     const selectedLogo = this.allLogos.find(logo => logo.id === this.state.selectedLogo);
     const selectedThreadColor = this.threadColors.find(color => color.id === this.state.selectedThreadColor);
 
@@ -550,21 +807,94 @@ class ClubCoastCustomizer {
         placement: this.state.selectedPlacement,
         threadColor: selectedThreadColor
       },
-      timestamp: new Date().toISOString()
+      isValid: true,
+      timestamp: new Date().toISOString(),
+      version: '1.0.0'
     };
 
     console.log('Sending customization data back to RepSpark:', customizationData);
 
-    if (window.parent && window.parent !== window) {
-      window.parent.postMessage({
-        action: 'SAVE',
-        payload: customizationData
-      }, 'https://app.repspark.com');
-    } else {
-      alert(`Added to cart!\n\nLogo: ${selectedLogo.name}\nPlacement: ${this.state.selectedPlacement} chest\nThread Color: ${selectedThreadColor.name}`);
+    try {
+      if (this.isEmbedded) {
+        // Send to RepSpark via postMessage
+        this.sendMessageToRepSpark('SAVE', customizationData);
+        
+        // Show success message
+        console.log('Customization sent to RepSpark successfully');
+        
+        // Optional: Show user feedback
+        this.showSuccessMessage('Customization added to cart!');
+        
+      } else {
+        // Fallback for testing outside RepSpark
+        alert(`Added to cart!\n\nLogo: ${selectedLogo.name}\nPlacement: ${this.state.selectedPlacement} chest\nThread Color: ${selectedThreadColor.name}`);
+        console.log('Demo mode - customization data:', customizationData);
+      }
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      
+      // Send error to RepSpark
+      this.sendMessageToRepSpark('ERROR', { 
+        message: error.message,
+        action: 'SAVE'
+      });
+      
+      // Show error to user
+      alert('There was an error adding your customization to cart. Please try again.');
     }
   }
 
+  // NEW: Show success message to user
+  showSuccessMessage(message) {
+    // Create temporary success notification
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #10b981;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      animation: slideIn 0.3s ease-out;
+    `;
+    
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+      notification.style.animation = 'slideOut 0.3s ease-out';
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.parentNode.removeChild(notification);
+        }
+      }, 300);
+    }, 3000);
+    
+    // Add CSS animations if not already present
+    if (!document.getElementById('notification-styles')) {
+      const style = document.createElement('style');
+      style.id = 'notification-styles';
+      style.textContent = `
+        @keyframes slideIn {
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+          from { transform: translateX(0); opacity: 1; }
+          to { transform: translateX(100%); opacity: 0; }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }
+
+  // ENHANCED: Get current customization state
   getCustomizationState() {
     const selectedLogo = this.allLogos.find(logo => logo.id === this.state.selectedLogo);
     const selectedThreadColor = this.threadColors.find(color => color.id === this.state.selectedThreadColor);
@@ -572,12 +902,114 @@ class ClubCoastCustomizer {
     return {
       selectedLogo,
       placement: this.state.selectedPlacement,
-      threadColor: selectedThreadColor
+      threadColor: selectedThreadColor,
+      searchQuery: this.state.logoSearchQuery,
+      validation: this.validateCustomizations(),
+      productInfo: {
+        productNumber: this.jwtData?.productNumber,
+        productName: this.jwtData?.productName
+      }
     };
+  }
+
+  // NEW: Get pricing information (placeholder for future enhancement)
+  getPricingInfo() {
+    // This would integrate with your pricing logic
+    const basePricing = {
+      logoPlacement: 3.50,
+      setupFee: 15.00,
+      additionalColors: 1.25
+    };
+    
+    return {
+      ...basePricing,
+      total: basePricing.logoPlacement + basePricing.setupFee
+    };
+  }
+
+  // NEW: Export configuration for external use
+  exportConfiguration() {
+    return {
+      state: this.state,
+      customizations: this.getCustomizationState(),
+      pricing: this.getPricingInfo(),
+      validation: this.validateCustomizations(),
+      metadata: {
+        version: '1.0.0',
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent
+      }
+    };
+  }
+
+  // NEW: Import configuration from external source
+  importConfiguration(config) {
+    if (!config || !config.state) {
+      console.error('Invalid configuration format');
+      return false;
+    }
+
+    try {
+      // Validate configuration structure
+      if (config.state.selectedLogo && 
+          config.state.selectedPlacement && 
+          config.state.selectedThreadColor) {
+        
+        this.state = { ...this.state, ...config.state };
+        this.updateUIFromState();
+        this.updateLogoOverlay();
+        
+        console.log('Configuration imported successfully');
+        return true;
+      }
+    } catch (error) {
+      console.error('Error importing configuration:', error);
+    }
+    
+    return false;
+  }
+
+  // NEW: Handle window resize for responsive behavior
+  handleResize() {
+    // Recalculate zoom positioning if needed
+    if (this.isZoomed) {
+      const zoomWrapper = document.getElementById('zoom-wrapper');
+      if (zoomWrapper) {
+        zoomWrapper.style.transform = 'scale(1)';
+        this.isZoomed = false;
+      }
+    }
+    
+    // Update logo overlay positioning
+    this.updateLogoOverlay();
+  }
+
+  // NEW: Cleanup method for proper disposal
+  destroy() {
+    // Remove event listeners
+    window.removeEventListener('message', this.repSparkMessageHandler);
+    window.removeEventListener('resize', this.handleResize);
+    
+    // Clear any timers or intervals
+    // (none in current implementation, but good practice)
+    
+    console.log('ClubCoastCustomizer destroyed');
   }
 }
 
+// Add resize handler
+window.addEventListener('resize', () => {
+  if (window.customizer) {
+    window.customizer.handleResize();
+  }
+});
+
 // Initialize the customizer when the page loads
 document.addEventListener('DOMContentLoaded', () => {
-  new ClubCoastCustomizer();
+  window.customizer = new ClubCoastCustomizer();
 });
+
+// Export for external access (useful for debugging and testing)
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = ClubCoastCustomizer;
+}
