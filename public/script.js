@@ -188,12 +188,11 @@ class ClubCoastCustomizer {
       if (this.isZoomed) {
         const rect = imageContainer.getBoundingClientRect();
         const x = e.clientX - rect.left;
-      
-        // Reset logo pointer events
-const logoOverlay = document.getElementById('logo-overlay');
-if (logoOverlay) {
-  logoOverlay.style.pointerEvents = 'auto';
-}
+        const y = e.clientY - rect.top;
+        
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
         // Calculate transform based on mouse position
         const moveX = (centerX - x) * 0.3; // Reduced multiplier for smoother pan
         const moveY = (centerY - y) * 0.3;
@@ -201,11 +200,6 @@ if (logoOverlay) {
         // Apply transform to wrapper (affects both image and logo)
         zoomWrapper.style.transform = `scale(2) translate(${moveX}px, ${moveY}px)`;
       }
-      // ALWAYS ensure the logo is in the zoom wrapper
-const zoomWrapper = document.getElementById('zoom-wrapper');
-if (zoomWrapper && overlay.parentElement !== zoomWrapper) {
-  zoomWrapper.appendChild(overlay);
-}
     };
 
     // Mouse leave - reset zoom
@@ -223,10 +217,9 @@ if (zoomWrapper && overlay.parentElement !== zoomWrapper) {
           productImage.style.cursor = 'zoom-in';
           zoomWrapper.style.zIndex = '1';
           
-          // Move logo back to its original container
+          // Reset logo pointer events only
           const logoOverlay = document.getElementById('logo-overlay');
           if (logoOverlay) {
-            imageContainer.appendChild(logoOverlay);
             logoOverlay.style.pointerEvents = 'auto';
           }
         }
@@ -481,8 +474,6 @@ if (zoomWrapper && overlay.parentElement !== zoomWrapper) {
     });
 
     this.updateLogoOverlay();
-    // Ensure logo is moved after updating
-    this.forceLogoIntoZoomWrapper();
   }
 
   selectThreadColor(colorId) {
@@ -497,8 +488,6 @@ if (zoomWrapper && overlay.parentElement !== zoomWrapper) {
     });
 
     this.updateLogoOverlay();
-    // Ensure logo is moved after updating
-    this.forceLogoIntoZoomWrapper();
   }
 
   // UPDATED LOGO OVERLAY METHOD
@@ -540,8 +529,7 @@ if (zoomWrapper && overlay.parentElement !== zoomWrapper) {
       overlay.className = `logo-overlay ${this.state.selectedPlacement}`;
       overlay.classList.remove('hidden');
       
-      // The logo should already be in the zoom wrapper from setupProductImageZoom
-      // But just in case, ensure it's there
+      // ALWAYS ensure the logo is in the zoom wrapper
       const zoomWrapper = document.getElementById('zoom-wrapper');
       if (zoomWrapper && overlay.parentElement !== zoomWrapper) {
         zoomWrapper.appendChild(overlay);
@@ -593,4 +581,3 @@ if (zoomWrapper && overlay.parentElement !== zoomWrapper) {
 document.addEventListener('DOMContentLoaded', () => {
   new ClubCoastCustomizer();
 });
-
