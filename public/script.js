@@ -130,42 +130,56 @@ class ClubCoastCustomizer {
     console.log('Club & Coast Customizer initialized');
   }
 
-  // Fixed zoom with logo staying in proper position
+  // NEW IMPROVED ZOOM IMPLEMENTATION
   setupProductImageZoom() {
     const productImage = document.getElementById('product-image');
     const imageContainer = productImage.parentElement;
     
     if (!productImage) return;
 
+    // Create a wrapper that will contain both image and logo
+    const zoomWrapper = document.createElement('div');
+    zoomWrapper.id = 'zoom-wrapper';
+    zoomWrapper.style.cssText = `
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-origin: center center;
+      transition: transform 0.3s ease-out;
+    `;
+
+    // Move the image into the wrapper
+    const parent = productImage.parentNode;
+    parent.insertBefore(zoomWrapper, productImage);
+    zoomWrapper.appendChild(productImage);
+
     // Set up container for zoom
     imageContainer.style.position = 'relative';
     imageContainer.style.overflow = 'hidden';
+
+    // Reset image styles since wrapper handles transforms
+    productImage.style.width = '100%';
+    productImage.style.height = '100%';
+    productImage.style.objectFit = 'cover';
+    productImage.style.cursor = 'zoom-in';
+    productImage.title = 'Hover to zoom and explore details';
 
     // Mouse enter - start zoom
     const handleMouseEnter = (e) => {
       if (!this.isZoomed) {
         this.isZoomed = true;
         
+        // Move logo to wrapper if it exists and is visible
         const logoOverlay = document.getElementById('logo-overlay');
-        
-        // Set transform origin to center for both elements
-        productImage.style.transformOrigin = 'center center';
         if (logoOverlay && !logoOverlay.classList.contains('hidden')) {
-          logoOverlay.style.transformOrigin = 'center center';
-          logoOverlay.style.transition = 'transform 0.3s ease-out';
+          zoomWrapper.appendChild(logoOverlay);
           logoOverlay.style.pointerEvents = 'none';
         }
         
-        productImage.style.transition = 'transform 0.3s ease-out';
-        productImage.style.transform = 'scale(2)';
+        // Scale the entire wrapper (image + logo together)
+        zoomWrapper.style.transform = 'scale(2)';
         productImage.style.cursor = 'zoom-out';
-        productImage.style.zIndex = '100';
-        
-        // Scale logo overlay with same transform origin
-        if (logoOverlay && !logoOverlay.classList.contains('hidden')) {
-          logoOverlay.style.transform = 'scale(2)';
-          logoOverlay.style.zIndex = '101';
-        }
+        zoomWrapper.style.zIndex = '100';
       }
     };
 
@@ -180,17 +194,11 @@ class ClubCoastCustomizer {
         const centerY = rect.height / 2;
         
         // Calculate transform based on mouse position
-        const moveX = (centerX - x) * 0.5;
-        const moveY = (centerY - y) * 0.5;
+        const moveX = (centerX - x) * 0.3; // Reduced multiplier for smoother pan
+        const moveY = (centerY - y) * 0.3;
         
-        // Apply same transform to both image and logo
-        const transform = `scale(2) translate(${moveX}px, ${moveY}px)`;
-        productImage.style.transform = transform;
-        
-        const logoOverlay = document.getElementById('logo-overlay');
-        if (logoOverlay && !logoOverlay.classList.contains('hidden')) {
-          logoOverlay.style.transform = transform;
-        }
+        // Apply transform to wrapper (affects both image and logo)
+        zoomWrapper.style.transform = `scale(2) translate(${moveX}px, ${moveY}px)`;
       }
     };
 
@@ -204,30 +212,25 @@ class ClubCoastCustomizer {
         if (this.isZoomed) {
           this.isZoomed = false;
           
-          productImage.style.transform = 'scale(1)';
+          // Reset wrapper transform
+          zoomWrapper.style.transform = 'scale(1)';
           productImage.style.cursor = 'zoom-in';
-          productImage.style.zIndex = '1';
+          zoomWrapper.style.zIndex = '1';
           
+          // Move logo back to its original container
           const logoOverlay = document.getElementById('logo-overlay');
           if (logoOverlay) {
-            logoOverlay.style.transform = 'scale(1)';
-            logoOverlay.style.zIndex = '';
+            imageContainer.appendChild(logoOverlay);
             logoOverlay.style.pointerEvents = 'auto';
           }
         }
       }
     };
 
-    // Add event listeners
-    productImage.addEventListener('mouseenter', handleMouseEnter);
-    productImage.addEventListener('mousemove', handleMouseMove);
-    productImage.addEventListener('mouseleave', handleMouseLeave);
-    imageContainer.addEventListener('mouseleave', handleMouseLeave);
+    // Add event listeners to the container for better coverage
+    imageContainer.addEventListener('mouseenter', handleMouseEnter);
     imageContainer.addEventListener('mousemove', handleMouseMove);
-
-    // Set initial cursor
-    productImage.style.cursor = 'zoom-in';
-    productImage.title = 'Hover to zoom and explore details';
+    imageContainer.addEventListener('mouseleave', handleMouseLeave);
   }
 
   parseJWTFromURL() {
@@ -488,6 +491,7 @@ class ClubCoastCustomizer {
     this.updateLogoOverlay();
   }
 
+  // UPDATED LOGO OVERLAY METHOD
   updateLogoOverlay() {
     const overlay = document.getElementById('logo-overlay');
     const selectedLogo = this.allLogos.find(logo => logo.id === this.state.selectedLogo);
@@ -525,12 +529,6 @@ class ClubCoastCustomizer {
 
       overlay.className = `logo-overlay ${this.state.selectedPlacement}`;
       overlay.classList.remove('hidden');
-      
-      // Ensure logo is in zoom wrapper if it exists
-      const zoomWrapper = document.getElementById('zoom-wrapper');
-      if (zoomWrapper && overlay.parentElement !== zoomWrapper) {
-        zoomWrapper.appendChild(overlay);
-      }
     } else {
       overlay.classList.add('hidden');
     }
