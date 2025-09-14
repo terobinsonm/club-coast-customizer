@@ -475,6 +475,8 @@ class ClubCoastCustomizer {
     });
 
     this.updateLogoOverlay();
+    // Ensure logo is moved after updating
+    this.forceLogoIntoZoomWrapper();
   }
 
   selectThreadColor(colorId) {
@@ -489,6 +491,8 @@ class ClubCoastCustomizer {
     });
 
     this.updateLogoOverlay();
+    // Ensure logo is moved after updating
+    this.forceLogoIntoZoomWrapper();
   }
 
   // UPDATED LOGO OVERLAY METHOD
