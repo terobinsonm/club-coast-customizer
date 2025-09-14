@@ -530,7 +530,8 @@ class ClubCoastCustomizer {
       overlay.className = `logo-overlay ${this.state.selectedPlacement}`;
       overlay.classList.remove('hidden');
       
-      // Always ensure logo is in the zoom wrapper
+      // The logo should already be in the zoom wrapper from setupProductImageZoom
+      // But just in case, ensure it's there
       const zoomWrapper = document.getElementById('zoom-wrapper');
       if (zoomWrapper && overlay.parentElement !== zoomWrapper) {
         zoomWrapper.appendChild(overlay);
