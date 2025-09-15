@@ -354,6 +354,28 @@ class ClubCoastCustomizer {
     }
   }
 
+  // NEW: Method to generate full URLs from relative paths
+  getFullLogoUrl(relativePath) {
+    // Handle different path formats
+    if (relativePath.startsWith('http://') || relativePath.startsWith('https://')) {
+      // Already a full URL
+      return relativePath;
+    }
+    
+    // Get the current domain
+    const baseUrl = window.location.origin;
+    
+    // Remove leading './' if present
+    let cleanPath = relativePath.replace(/^\.\//, '');
+    
+    // Ensure path starts with '/' for proper URL construction
+    if (!cleanPath.startsWith('/')) {
+      cleanPath = '/' + cleanPath;
+    }
+    
+    return `${baseUrl}${cleanPath}`;
+  }
+
   parseJWTFromURL() {
     try {
         const urlParams = new URLSearchParams(window.location.search);
@@ -786,7 +808,7 @@ class ClubCoastCustomizer {
     }
   }
 
-  // ENHANCED ADD TO CART WITH FULL REPSPARK INTEGRATION
+  // ENHANCED ADD TO CART WITH FULL REPSPARK INTEGRATION AND LOGO URL
   addToCart() {
     // Validate before proceeding
     const validation = this.validateCustomizations();
@@ -803,9 +825,18 @@ class ClubCoastCustomizer {
     const customizationData = {
       productNumber: this.jwtData?.productNumber || 'CNC-P1000',
       customizations: {
-        logo: selectedLogo,
+        logo: {
+          id: selectedLogo.id,
+          name: selectedLogo.name,
+          preview: selectedLogo.preview, // Keep original relative path
+          url: this.getFullLogoUrl(selectedLogo.preview) // Add full accessible URL
+        },
         placement: this.state.selectedPlacement,
         threadColor: selectedThreadColor
+      },
+      pricing: {
+        logoFee: 5.00,
+        currency: 'USD'
       },
       isValid: true,
       timestamp: new Date().toISOString(),
@@ -827,7 +858,7 @@ class ClubCoastCustomizer {
         
       } else {
         // Fallback for testing outside RepSpark
-        alert(`Added to cart!\n\nLogo: ${selectedLogo.name}\nPlacement: ${this.state.selectedPlacement} chest\nThread Color: ${selectedThreadColor.name}`);
+        alert(`Added to cart!\n\nLogo: ${selectedLogo.name}\nLogo URL: ${this.getFullLogoUrl(selectedLogo.preview)}\nPlacement: ${this.state.selectedPlacement} chest\nThread Color: ${selectedThreadColor.name}\nLogo Fee: $5.00`);
         console.log('Demo mode - customization data:', customizationData);
       }
     } catch (error) {
@@ -894,13 +925,18 @@ class ClubCoastCustomizer {
     }
   }
 
-  // ENHANCED: Get current customization state
+  // ENHANCED: Get current customization state with logo URL and pricing
   getCustomizationState() {
     const selectedLogo = this.allLogos.find(logo => logo.id === this.state.selectedLogo);
     const selectedThreadColor = this.threadColors.find(color => color.id === this.state.selectedThreadColor);
 
     return {
-      selectedLogo,
+      selectedLogo: selectedLogo ? {
+        id: selectedLogo.id,
+        name: selectedLogo.name,
+        preview: selectedLogo.preview, // Keep original relative path
+        url: this.getFullLogoUrl(selectedLogo.preview) // Add full accessible URL
+      } : null,
       placement: this.state.selectedPlacement,
       threadColor: selectedThreadColor,
       searchQuery: this.state.logoSearchQuery,
@@ -908,6 +944,10 @@ class ClubCoastCustomizer {
       productInfo: {
         productNumber: this.jwtData?.productNumber,
         productName: this.jwtData?.productName
+      },
+      pricing: {
+        logoFee: 5.00,
+        currency: 'USD'
       }
     };
   }
