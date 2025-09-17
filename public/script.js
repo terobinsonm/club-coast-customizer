@@ -376,47 +376,125 @@ class ClubCoastCustomizer {
     return `${baseUrl}${cleanPath}`;
   }
 
+  // UPDATED JWT PARSING METHOD
   parseJWTFromURL() {
     try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const token = urlParams.get('token');
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
+      
+      if (token) {
+        console.log('Raw JWT token received:', token);
         
-        if (token) {
-            console.log('Raw token received:', token);
-            
-            // Split the JWT into parts
-            const parts = token.split('.');
-            if (parts.length !== 3) {
-                throw new Error('Invalid JWT format');
-            }
-            
-            // Decode the payload (second part)
-            const payload = parts[1];
-            // Add padding if needed
-            const paddedPayload = payload + '='.repeat((4 - payload.length % 4) % 4);
-            
-            this.jwtData = JSON.parse(atob(paddedPayload));
-            console.log('JWT Data received:', this.jwtData);
-            
-            this.updateProductFromJWT();
-        } else {
-            console.log('No JWT token found, using demo data');
-            this.jwtData = {
-                productNumber: 'CNC-P1000',
-                productName: 'Seaside Performance Polo - Navy Men\'s',
-                productImage: this.PRODUCT_CONFIG['CNC-P1000'].image
-            };
-            this.updateProductFromJWT();
+        // Parse JWT structure
+        const parts = token.split('.');
+        if (parts.length !== 3) {
+          throw new Error('Invalid JWT format - expected 3 parts (header.payload.signature)');
         }
-    } catch (error) {
-        console.error('Error parsing JWT:', error);
-        // Fallback to demo data
+        
+        // Decode the payload (second part)
+        const payload = parts[1];
+        // Add padding if needed for base64 decoding
+        const paddedPayload = payload + '='.repeat((4 - payload.length % 4) % 4);
+        
+        const decodedPayload = JSON.parse(atob(paddedPayload));
+        console.log('Decoded JWT payload:', decodedPayload);
+        
+        // Validate JWT claims
+        const now = Math.floor(Date.now() / 1000);
+        
+        if (decodedPayload.exp && now > decodedPayload.exp) {
+          throw new Error('JWT token has expired');
+        }
+        
+        if (decodedPayload.nbf && now < decodedPayload.nbf) {
+          throw new Error('JWT token not yet valid (nbf claim)');
+        }
+        
+        // Validate issuer - handle both repspark.net and app.repspark.com
+        const validIssuers = ['repspark.net', 'https://app.repspark.com'];
+        if (decodedPayload.iss && !validIssuers.includes(decodedPayload.iss)) {
+          console.warn('Unexpected JWT issuer:', decodedPayload.iss);
+        }
+        
+        // Handle compressed payload if needed
+        let actualPayload;
+        if (decodedPayload.compressed === true) {
+          // Handle gzip decompression
+          console.log('JWT payload is compressed - attempting decompression');
+          try {
+            actualPayload = this.decompressPayload(decodedPayload.payload);
+          } catch (compressionError) {
+            console.error('Failed to decompress payload:', compressionError);
+            console.warn('Falling back to raw payload data');
+            actualPayload = decodedPayload.payload;
+          }
+        } else {
+          actualPayload = decodedPayload.payload;
+        }
+        
+        console.log('Extracted payload data:', actualPayload);
+        
+        // Store the JWT data
         this.jwtData = {
-            productNumber: 'CNC-P1000',
-            productName: 'Seaside Performance Polo - Navy Men\'s',
-            productImage: this.PRODUCT_CONFIG['CNC-P1000'].image
+          ...actualPayload,
+          // Add metadata from JWT claims
+          _jwtClaims: {
+            issued: decodedPayload.iat,
+            expires: decodedPayload.exp,
+            notBefore: decodedPayload.nbf,
+            issuer: decodedPayload.iss,
+            compressed: decodedPayload.compressed
+          }
+        };
+        
+        this.updateProductFromJWT();
+        
+      } else {
+        console.log('No JWT token found, using demo data');
+        this.jwtData = {
+          productNumber: 'CNC-P1000',
+          productName: 'Seaside Performance Polo - Navy Men\'s',
+          productImage: this.PRODUCT_CONFIG['CNC-P1000'].image
         };
         this.updateProductFromJWT();
+      }
+    } catch (error) {
+      console.error('Error parsing JWT:', error);
+      // Fallback to demo data
+      this.jwtData = {
+        productNumber: 'CNC-P1000',
+        productName: 'Seaside Performance Polo - Navy Men\'s',
+        productImage: this.PRODUCT_CONFIG['CNC-P1000'].image,
+        _error: error.message
+      };
+      this.updateProductFromJWT();
+    }
+  }
+
+  // NEW: Handle gzip decompression for compressed payloads
+  decompressPayload(compressedBase64) {
+    // Note: This is a simplified implementation
+    // For full gzip support in browsers, you'd typically need a library like 'pako'
+    console.warn('Compressed JWT payload detected - basic decompression attempted');
+    
+    try {
+      // Convert base64 to bytes
+      const compressedBytes = atob(compressedBase64);
+      
+      // For now, just return the base64 decoded content as a fallback
+      // In production, you'd want to implement proper gzip decompression
+      console.warn('Full gzip decompression not implemented - using fallback');
+      
+      // Try to parse as JSON in case it's not actually compressed
+      try {
+        return JSON.parse(compressedBytes);
+      } catch (jsonError) {
+        console.warn('Compressed payload is not valid JSON, returning as string');
+        return { rawData: compressedBytes };
+      }
+    } catch (error) {
+      console.error('Decompression failed:', error);
+      throw new Error('Failed to decompress JWT payload');
     }
   }
 
