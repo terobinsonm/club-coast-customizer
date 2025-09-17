@@ -488,6 +488,20 @@ class ClubCoastCustomizer {
     if (this.isEmbedded) this.postToRepSpark('CANCEL', '');
   }
 
+  // Visual toast for standalone testing (not embedded)
+showSuccessMessage(message) {
+  const n = document.createElement('div');
+  n.style.cssText = `
+    position: fixed; top: 20px; right: 20px; z-index: 1000;
+    background: #10b981; color: #fff; padding: 12px 16px;
+    border-radius: 6px; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,.15);
+    transition: opacity .3s ease;
+  `;
+  n.textContent = message;
+  document.body.appendChild(n);
+  setTimeout(() => { n.style.opacity = '0'; setTimeout(() => n.remove(), 300); }, 2500);
+}
+  
   // Validation
   validateCustomizations() {
     const errors = [];
