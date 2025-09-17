@@ -141,8 +141,6 @@ class ClubCoastCustomizer {
     this.isEmbedded = window.parent && window.parent !== window;
     if (this.isEmbedded) {
       console.log('Running in embedded RepSpark environment');
-      // Send ready message to RepSpark
-      this.sendMessageToRepSpark('READY', { ready: true });
     }
   }
 
@@ -1131,3 +1129,4 @@ document.addEventListener('DOMContentLoaded', () => {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = ClubCoastCustomizer;
 }
+
