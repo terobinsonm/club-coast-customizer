@@ -8,7 +8,7 @@ class ClubCoastCustomizer {
         color: 'Navy',
         gender: 'Men\'s',
         colorCode: 'NAVM',
-        image: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/products/CNCP1000.jpg',
+        image: '/images/products/CNCP1000.jpg',
         alt: 'Navy men\'s performance polo'
       },
       'CNC-P1001': {
@@ -17,7 +17,7 @@ class ClubCoastCustomizer {
         color: 'Navy',
         gender: 'Women\'s',
         colorCode: 'NAVF',
-        image: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/products/CNCP1001.jpg',
+        image: '/images/products/CNCP1001.jpg',
         alt: 'Navy women\'s performance polo'
       },
       'CNC-P1002': {
@@ -26,7 +26,7 @@ class ClubCoastCustomizer {
         color: 'White',
         gender: 'Men\'s',
         colorCode: 'WHTM',
-        image: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/products/CNCP1002.jpg',
+        image: '/images/products/CNCP1002.jpg',
         alt: 'White men\'s performance polo'
       },
       'CNC-P1003': {
@@ -35,7 +35,7 @@ class ClubCoastCustomizer {
         color: 'White',
         gender: 'Women\'s',
         colorCode: 'WHTF',
-        image: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/products/CNCP1003.jpg',
+        image: '/images/products/CNCP1003.jpg',
         alt: 'White women\'s performance polo'
       },
       'CNC-P1004': {
@@ -44,7 +44,7 @@ class ClubCoastCustomizer {
         color: 'Blue',
         gender: 'Men\'s',
         colorCode: 'BLUM',
-        image: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/products/CNCP1004.jpg',
+        image: '/images/products/CNCP1004.jpg',
         alt: 'Blue men\'s performance polo'
       },
       'CNC-P1005': {
@@ -53,23 +53,23 @@ class ClubCoastCustomizer {
         color: 'Blue',
         gender: 'Women\'s',
         colorCode: 'BLUF',
-        image: 'https://raw.githubusercontent.com/terobinsonm/club-coast-customizer/main/public/images/products/CNCP1005.jpg',
+        image: '/images/products/CNCP1005.jpg',
         alt: 'Blue women\'s performance polo'
       }
     };
 
     // JWT data from RepSpark
     this.jwtData = null;
-    
+
     // All available logos
     this.allLogos = [
-      { id: '1',  name: 'Kiawah Island Golf Resort',      preview: './images/kiawah.png' },
-      { id: '2',  name: 'Whistling Straits Golf Shop',    preview: './images/whistling-straits.png' },
-      { id: '3',  name: 'Bandon Dunes Golf Resort',       preview: './images/bandon-dunes.png' },
-      { id: '4',  name: 'Augusta National Golf Shop',     preview: './images/augusta.png' },
-      { id: '5',  name: 'Pinehurst Resort',               preview: './images/pinehurst.png' },
-      { id: '6',  name: 'Torrey Pines Golf Course',       preview: './images/torrey-pines.png' },
-      { id: '7',  name: 'TPC Sawgrass',                   preview: './images/tpc-sawgrass.png' },
+      { id: '1', name: 'Kiawah Island Golf Resort',   preview: '/images/logos/kiawah.png' },
+      { id: '2', name: 'Whistling Straits Golf Shop', preview: '/images/logos/whistling-straits.png' },
+      { id: '3', name: 'Bandon Dunes Golf Resort',    preview: '/images/logos/bandon-dunes.png' },
+      { id: '4', name: 'Augusta National Golf Shop',  preview: '/images/logos/augusta.png' },
+      { id: '5', name: 'Pinehurst Resort',            preview: '/images/logos/pinehurst.png' },
+      { id: '6', name: 'Torrey Pines Golf Course',    preview: '/images/logos/torrey-pines.png' },
+      { id: '7', name: 'TPC Sawgrass',                preview: '/images/logos/tpc-sawgrass.png' },
     ];
 
     // Initially displayed logos
