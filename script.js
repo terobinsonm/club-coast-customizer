@@ -36,13 +36,16 @@ class ClubCoastCustomizer {
     this.state = { selectedLogo: '1', selectedPlacement: 'left', selectedThreadColor: 'club', logoSearchQuery: '' };
     this.isZoomed = false;
 
-    // Embedding / origins
-    this.isEmbedded = false;
-    this.allowedParentOrigins = [
-      'https://app.repspark.com',
-      'http://localhost:37803'
-    ];
-    this.parentOrigin = 'https://app.repspark.com';
+// Embedding / origins
+this.isEmbedded = false;
+this.allowedParentOrigins = [
+  'https://app.repspark.com',
+  'https://app.repspark.net',
+  'https://dev.repspark.net',
+  'http://localhost:37803'
+];
+this.parentOrigin = 'https://app.repspark.com'; // default
+
 
     this.init();
   }
@@ -447,11 +450,15 @@ async parseJWTFromURL() {
     };
 
     try {
-      const resp = await fetch('/api/repspark/sign-save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ payload: payloadObject })
-      });
+const resp = await fetch('/api/repspark/sign-save', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    payload: payloadObject,
+    targetAudience: this.parentOrigin // 👈 set aud to the embedding host
+  })
+});
+
       if (!resp.ok) {
         const errText = await resp.text();
         throw new Error(`Signer ${resp.status}: ${errText}`);
