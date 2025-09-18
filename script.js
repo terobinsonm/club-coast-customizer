@@ -103,57 +103,50 @@ class ClubCoastCustomizer {
     }
   }
 
-  // Parse the initial JWT from ?token=..., no compression handling (per spec)
-  parseJWTFromURL() {
-    try {
-      const token = new URLSearchParams(window.location.search).get('token');
-      if (!token) {
-        // demo default
-        this.jwtData = {
-          productNumber: 'CNC-P1000',
-          productName: 'Seaside Performance Polo - Navy Men\'s',
-          productImage: this.PRODUCT_CONFIG['CNC-P1000'].image
-        };
-        this.updateProductFromJWT();
-        return;
-      }
+// Replace your current parseJWTFromURL() with this version
+async parseJWTFromURL() {
+  const token = new URLSearchParams(window.location.search).get('token');
 
-      console.log('Raw JWT token received');
-      const parts = token.split('.');
-      if (parts.length !== 3) throw new Error('Invalid JWT format');
+  // Standalone/demo fallback (no token present)
+  const useDemoDefaults = () => {
+    this.jwtData = {
+      productNumber: 'CNC-P1000',
+      productName: 'Seaside Performance Polo - Navy Men\'s',
+      productImage: this.PRODUCT_CONFIG['CNC-P1000'].image
+    };
+    this.updateProductFromJWT();
+  };
 
-      const b64urlToB64 = (s) => s.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat((4 - s.length % 4) % 4);
-      const payloadJson = atob(b64urlToB64(parts[1]));
-      const claims = JSON.parse(payloadJson);
+  if (!token) { useDemoDefaults(); return; }
 
-      // Basic claim checks (no signature verification in browser)
-      const now = Math.floor(Date.now() / 1000);
-      if (claims.exp && now > claims.exp) throw new Error('JWT token has expired');
-      if (claims.nbf && now < claims.nbf) throw new Error('JWT token not yet valid');
+  try {
+    // Ask your backend to VERIFY signature + issuer + audience with RepSpark's public key
+    const resp = await fetch('/api/repspark/verify-init', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        token,
+        // RepSpark sets aud = your app origin. Use the runtime origin so it works across prod/preview/tunnel.
+        expectedAudience: window.location.origin
+      })
+    });
 
-      let payloadData = claims.payload;
-      // payload may be a JSON string; try to parse
-      if (typeof payloadData === 'string') {
-        try { payloadData = JSON.parse(payloadData); } catch { /* may be XML or plain string; keep as-is */ }
-      }
+    if (!resp.ok) throw new Error(await resp.text());
+    const { payload, claims } = await resp.json();
 
-      this.jwtData = {
-        ...(typeof payloadData === 'object' ? payloadData : {}),
-        _jwtClaims: { issued: claims.iat, expires: claims.exp, issuer: claims.iss, audience: claims.aud }
-      };
+    // payload may be object (usual) or a string (e.g., XML) — keep as-is if string
+    this.jwtData = {
+      ...(typeof payload === 'object' ? payload : {}),
+      _jwtClaims: claims
+    };
 
-      this.updateProductFromJWT();
-    } catch (err) {
-      console.error('Error parsing JWT:', err);
-      this.jwtData = {
-        productNumber: 'CNC-P1000',
-        productName: 'Seaside Performance Polo - Navy Men\'s',
-        productImage: this.PRODUCT_CONFIG['CNC-P1000'].image,
-        _error: String(err?.message || err)
-      };
-      this.updateProductFromJWT();
-    }
+    this.updateProductFromJWT();
+  } catch (e) {
+    console.warn('Initial token verification failed; using demo defaults.', e);
+    useDemoDefaults();
   }
+}
+
 
   getCoordinatedColors(productColor) {
     const colorConfig = {
