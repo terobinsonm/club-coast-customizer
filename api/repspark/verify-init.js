@@ -3,61 +3,50 @@ const jwt = require('jsonwebtoken');
 const zlib = require('zlib');
 
 module.exports = async (req, res) => {
-  if (req.method !== 'POST') {
-    res.status(405).json({ error: 'Method not allowed' });
-    return;
-  }
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
     const { token, expectedAudience } = req.body || {};
-    if (!token) {
-      res.status(400).json({ error: 'Missing token' });
-      return;
-    }
+    if (!token) return res.status(400).json({ error: 'Missing token' });
+    if (!expectedAudience) return res.status(400).json({ error: 'Missing expectedAudience' });
 
-    // Support either env name and fix \n for Vercel-style multiline values
+    // Public key from Vercel env (supports both names + \n fix)
     const publicKeyRaw =
       process.env.REPSPARK_PUBLIC_KEY ||
-      process.env.RESPARK_PUBLIC_KEY || // fallback if you used this name earlier
+      process.env.RESPARK_PUBLIC_KEY || // older var name fallback
       '';
+    if (!publicKeyRaw) return res.status(500).json({ error: 'Missing REPSPARK_PUBLIC_KEY' });
 
     const publicKey = publicKeyRaw.replace(/\\n/g, '\n');
 
-    // Accept all RepSpark issuers you need to support
-    const allowedIssuers = [
-      'https://app.repspark.com',
-      'https://app.repspark.net',
-      'https://dev.repspark.net',
-    ];
+    // RepSpark standard issuer for init tokens
+    const allowedIssuers = ['repspark.net'];
 
     // Verify RS256 signature & claims from RepSpark
     const claims = jwt.verify(token, publicKey, {
       algorithms: ['RS256'],
       issuer: allowedIssuers,
-      audience: expectedAudience,      // e.g., https://club-coast-customizer.vercel.app
-      clockTolerance: 30               // allow small clock skew (seconds)
+      audience: expectedAudience,  // e.g., https://club-coast-customizer.vercel.app
+      clockTolerance: 30           // small clock skew (seconds)
     });
 
-    // Handle 'compressed' + 'payload' per spec
+    // Handle 'compressed' + 'payload'
     let payloadObj;
     if (claims.compressed === true) {
-      // claims.payload is base64 gzip
+      // payload is base64-encoded gzip(JSON/string)
       const buf = Buffer.from(claims.payload, 'base64');
-      const json = zlib.gunzipSync(buf).toString('utf8');
-
-      // If it’s JSON, parse it; otherwise return as string
+      const text = zlib.gunzipSync(buf).toString('utf8');
       try {
-        payloadObj = JSON.parse(json);
+        payloadObj = JSON.parse(text);
       } catch {
-        payloadObj = json; // could be XML or plain text
+        payloadObj = text; // could be XML/plain text
       }
     } else {
-      // Uncompressed: payload may already be an object or a JSON/XML string
       if (typeof claims.payload === 'string') {
         try {
           payloadObj = JSON.parse(claims.payload);
         } catch {
-          payloadObj = claims.payload; // keep raw string if not JSON
+          payloadObj = claims.payload; // keep raw string
         }
       } else {
         payloadObj = claims.payload;
