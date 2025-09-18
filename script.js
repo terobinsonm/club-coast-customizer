@@ -453,10 +453,8 @@ async parseJWTFromURL() {
 const resp = await fetch('/api/repspark/sign-save', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    payload: payloadObject,
-    targetAudience: this.parentOrigin // 👈 set aud to the embedding host
-  })
+body: JSON.stringify({ payload: payloadObject })
+
 });
 
       if (!resp.ok) {
