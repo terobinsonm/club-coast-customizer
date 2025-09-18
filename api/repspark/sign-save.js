@@ -8,27 +8,43 @@ module.exports = async (req, res) => {
   }
 
   try {
-    // Vercel parses JSON automatically when Content-Type: application/json
-    const { payload } = req.body || {};
+    const { payload, targetAudience } = req.body || {};
     if (!payload) {
       res.status(400).json({ error: 'Missing payload' });
       return;
     }
 
-    // If RepSpark needs XML inside the claim, serialize here; JSON is fine otherwise
-    const payloadClaim = JSON.stringify(payload);
+    // Whitelist the hosts that are allowed to embed you
+    const allowedAudiences = new Set([
+      'https://app.repspark.com',
+      'https://app.repspark.net',
+      'https://dev.repspark.net',
+      'http://localhost:37803'
+    ]);
 
-    const nowSec = Math.floor(Date.now() / 1000);
+    // Use the parent origin the iframe is running on, falling back to app.repspark.com
+    const aud = allowedAudiences.has(targetAudience)
+      ? targetAudience
+      : 'https://app.repspark.com';
+
+    // Vercel env vars sometimes store "\n"; this makes it robust either way
+    const privateKey = (process.env.REPSPARK_PRIVATE_KEY || '').includes('\\n')
+      ? process.env.REPSPARK_PRIVATE_KEY.replace(/\\n/g, '\n')
+      : process.env.REPSPARK_PRIVATE_KEY;
+
+    // RepSpark expects RS256 with your issuer and their (parent) audience
     const token = jwt.sign(
       {
-        payload: payloadClaim,                 // your business data
-        iat: nowSec,
-        exp: nowSec + 5 * 60,                  // 5 minutes
-        iss: process.env.REPSPARK_ISSUER,      // e.g. "https://club-coast-customizer.vercel.app"
-        aud: 'https://app.repspark.com'
+        // Keep business data inside "payload" as a STRING per their spec
+        payload: typeof payload === 'string' ? payload : JSON.stringify(payload)
       },
-      process.env.REPSPARK_PRIVATE_KEY,        // PKCS#8 PEM (full BEGIN/END block)
-      { algorithm: 'RS256' }
+      privateKey,
+      {
+        algorithm: 'RS256',
+        issuer: process.env.REPSPARK_ISSUER, // e.g. https://club-coast-customizer.vercel.app
+        audience: aud,                        // dynamic: parent origin
+        expiresIn: '5m'
+      }
     );
 
     res.status(200).json({ jwt: token });
