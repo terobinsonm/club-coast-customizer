@@ -505,29 +505,46 @@ body {
   font-size: 16px;
 }
 
-/* Add to Cart Button */
+/* Actions row: two buttons side-by-side */
 .cart-button-container {
-  padding: 24px;
+  padding: 16px 24px;               /* a bit tighter */
   border-top: 1px solid #e5e7eb;
   background: white;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;        /* or space-between */
 }
 
-.add-to-cart-btn {
-  width: 100%;
-  padding: 16px 24px;
-  background: rgba(48, 48, 48, 1);
-  color: white;
-  border: none;
+/* Make each button share the row */
+.add-to-cart-btn,
+.cancel-btn {
+  flex: 1 1 0;                      /* equal widths */
+  padding: 12px 16px;               /* smaller than before */
+  font-size: 14px;
   border-radius: 6px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  font-family: inherit;
 }
 
-.add-to-cart-btn:hover {
-  background: rgba(48, 48, 48, 0.9);
+/* Primary (Add to cart) */
+.add-to-cart-btn {
+  background: rgba(48,48,48,1);
+  color: #fff;
+  border: 1px solid rgba(48,48,48,1);
+  /* IMPORTANT: override the old full-width rule */
+  width: auto;
+}
+.add-to-cart-btn:hover { background: rgba(48,48,48,.9); }
+
+/* Secondary (Cancel) */
+.cancel-btn {
+  background: #fff;
+  color: rgba(48,48,48,1);
+  border: 1px solid #d1d5db;
+}
+.cancel-btn:hover { background: #f9fafb; }
+
+/* Stack vertically on narrow screens */
+@media (max-width: 520px) {
+  .cart-button-container { flex-direction: column; }
 }
 
 /* Responsive */
