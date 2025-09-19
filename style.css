@@ -505,21 +505,23 @@ body {
   font-size: 16px;
 }
 
-/* Actions row: two buttons side-by-side */
+/* ACTIONS ROW — full-width, aligned edges, Add to cart wider */
 .cart-button-container {
-  padding: 16px 24px;               /* a bit tighter */
+  padding: 24px;                         /* matches sections above */
   border-top: 1px solid #e5e7eb;
-  background: white;
-  display: flex;
+  background: #fff;
+
+  /* Use grid so buttons span the full row */
+  display: grid;
+  grid-template-columns: minmax(0,1fr) minmax(0,1.75fr); /* Cancel | Add to cart */
   gap: 12px;
-  justify-content: flex-end;        /* or space-between */
 }
 
-/* Make each button share the row */
-.add-to-cart-btn,
-.cancel-btn {
-  flex: 1 1 0;                      /* equal widths */
-  padding: 12px 16px;               /* smaller than before */
+/* Buttons fill their grid cells */
+.cancel-btn,
+.add-to-cart-btn {
+  width: 100%;
+  padding: 12px 16px;
   font-size: 14px;
   border-radius: 6px;
 }
@@ -529,8 +531,6 @@ body {
   background: rgba(48,48,48,1);
   color: #fff;
   border: 1px solid rgba(48,48,48,1);
-  /* IMPORTANT: override the old full-width rule */
-  width: auto;
 }
 .add-to-cart-btn:hover { background: rgba(48,48,48,.9); }
 
@@ -544,7 +544,7 @@ body {
 
 /* Stack vertically on narrow screens */
 @media (max-width: 520px) {
-  .cart-button-container { flex-direction: column; }
+  .cart-button-container { grid-template-columns: 1fr; }
 }
 
 /* Responsive */
