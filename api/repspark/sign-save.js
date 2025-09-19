@@ -1,25 +1,37 @@
 // /api/repspark/sign-save.js
 const jwt = require('jsonwebtoken');
+const zlib = require('zlib'); // only needed if you ever choose to compress
 
 module.exports = async (req, res) => {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== 'POST') { res.status(405).json({ error: 'Method not allowed' }); return; }
 
   try {
     const { payload } = req.body || {};
-    if (!payload) return res.status(400).json({ error: 'Missing payload' });
+    if (!payload) { res.status(400).json({ error: 'Missing payload' }); return; }
 
-    const payloadClaim = JSON.stringify(payload);
+    // Serialize your business data to JSON
+    const json = JSON.stringify(payload);
+
+    // Not compressing right now, but RepSpark still wants the flag present.
+    const compressed = false;      // <- required claim, even when false
+    const payloadClaim = json;     // if you later compress, this becomes base64(gzip(json))
+
+    // If you ever need compression later, do this instead:
+    // const gz = zlib.gzipSync(Buffer.from(json, 'utf8'));
+    // const payloadClaim = gz.toString('base64');
+    // const compressed = true;
+
     const nowSec = Math.floor(Date.now() / 1000);
-
     const token = jwt.sign(
       {
-        payload: payloadClaim,
+        payload: payloadClaim,                 // string (JSON or base64 if compressed)
+        compressed,                            // REQUIRED: true/false
         iat: nowSec,
         exp: nowSec + 5 * 60,
-        iss: process.env.REPSPARK_ISSUER,                           // your app origin
-        aud: process.env.REPSPARK_AUDIENCE || 'repspark.net'        // 👈 ALWAYS repspark.net
+        iss: (process.env.REPSPARK_ISSUER || '').trim(),   // e.g. https://club-coast-customizer.vercel.app
+        aud: 'https://app.repspark.net'                    // per your latest requirement
       },
-      process.env.REPSPARK_PRIVATE_KEY,
+      (process.env.REPSPARK_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
       { algorithm: 'RS256' }
     );
 
