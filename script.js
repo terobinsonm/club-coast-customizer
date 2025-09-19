@@ -185,8 +185,6 @@ async parseJWTFromURL() {
       const imgEl = document.getElementById('product-image');
       if (imgEl) { imgEl.src = product.image; imgEl.alt = product.alt; }
 
-      this.renderThreadColors();
-      if (this.state.selectedThreadColor === 'coordinated') this.updateLogoOverlay();
     } else {
       const titleEl = document.getElementById('product-title');
       if (titleEl && this.jwtData.productName) titleEl.textContent = this.jwtData.productName;
@@ -194,6 +192,37 @@ async parseJWTFromURL() {
       const imgEl = document.getElementById('product-image');
       if (imgEl && this.jwtData.productImage) imgEl.src = this.jwtData.productImage;
     }
+    // --- APPLY SAVED CUSTOMIZATIONS (edit mode) ---
+const saved = this.jwtData && this.jwtData.customizations;
+if (saved) {
+  // logo
+  if (saved.logo?.id && this.allLogos.some(l => l.id === saved.logo.id)) {
+    this.state.selectedLogo = saved.logo.id;
+  } else if (saved.logo?.name) {
+    const byName = this.allLogos.find(l => l.name === saved.logo.name);
+    if (byName) this.state.selectedLogo = byName.id;
+  }
+
+  // placement
+  if (saved.placement && ['left','right','center'].includes(saved.placement)) {
+    this.state.selectedPlacement = saved.placement;
+  }
+
+  // thread color
+  if (saved.threadColor?.id && this.threadColors.some(c => c.id === saved.threadColor.id)) {
+    this.state.selectedThreadColor = saved.threadColor.id;
+  }
+}
+
+// Reflect state in the UI
+this.renderLogos();
+this.renderThreadColors();
+// sync placement radios
+document.querySelectorAll('input[name="placement"]').forEach(r => {
+  r.checked = (r.value === this.state.selectedPlacement);
+});
+this.updateLogoOverlay();
+
   }
 
   renderLogos() {
