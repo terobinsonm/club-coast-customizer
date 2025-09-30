@@ -115,13 +115,13 @@ detectParentOrigin() {
       
       console.log('[ORIGIN] ✓ Final parentOrigin:', this.parentOrigin);
     } else {
-      // No referrer - use dev as safe default
+      // No referrer - use CORRECT dev as safe default
       console.warn('[ORIGIN] No referrer - defaulting to dev');
-      this.parentOrigin = 'https://api.dev.repspark.net';
+      this.parentOrigin = 'https://app.dev.repspark.com';  // ← FIXED
     }
   } catch (err) {
     console.error('[ORIGIN] Error:', err);
-    this.parentOrigin = 'https://api.dev.repspark.net';
+    this.parentOrigin = 'https://app.dev.repspark.com';  // ← FIXED
   }
 }
 
