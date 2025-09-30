@@ -36,16 +36,17 @@ class ClubCoastCustomizer {
     this.state = { selectedLogo: '1', selectedPlacement: 'left', selectedThreadColor: 'club', logoSearchQuery: '' };
     this.isZoomed = false;
 
-// Embedding / origins
-this.isEmbedded = false;
-this.allowedParentOrigins = [
-  'https://app.repspark.com',
-  'https://app.repspark.net',
-  'https://app.dev.repspark.com',  // ← ADD THIS LINE
-  'https://dev.repspark.net',
-  'http://localhost:37803'
-];
-this.parentOrigin = 'https://app.dev.repspark.com'; // default - leave as is
+    // Embedding / origins
+    this.isEmbedded = false;
+    this.allowedParentOrigins = [
+      'https://app.repspark.com',
+      'https://app.repspark.net',
+      'https://dev.repspark.net',
+      'http://localhost:37803'
+    ];
+    this.parentOrigin = 'https://app.repspark.com'; // default
+
+    this.init();
   }
 
   init() {
@@ -93,21 +94,24 @@ this.parentOrigin = 'https://app.dev.repspark.com'; // default - leave as is
     }
   }
 
-detectParentOrigin() {
-  console.log('=== PARENT ORIGIN DETECTION ===');
-  try {
-    const ref = document.referrer ? new URL(document.referrer).origin : null;
-    console.log('[ORIGIN] Referrer:', document.referrer);
-    console.log('[ORIGIN] Parsed origin:', ref);
-    
-    if (ref && this.allowedParentOrigins.includes(ref)) {
-      this.parentOrigin = ref;
-      console.log('[ORIGIN] ✓ Using referrer origin:', this.parentOrigin);
+  detectParentOrigin() {
+    console.log('=== PARENT ORIGIN DETECTION ===');
+    try {
+      const ref = document.referrer ? new URL(document.referrer).origin : null;
+      console.log('[ORIGIN] Referrer:', document.referrer);
+      console.log('[ORIGIN] Parsed origin:', ref);
+      console.log('[ORIGIN] Allowed origins:', this.allowedParentOrigins);
+      
+      if (ref && this.allowedParentOrigins.includes(ref)) {
+        this.parentOrigin = ref;
+        console.log('[ORIGIN] ✓ Using referrer origin:', this.parentOrigin);
+      } else {
+        console.log('[ORIGIN] ✗ Using default origin:', this.parentOrigin);
+      }
+    } catch (err) {
+      console.error('[ORIGIN] ✗ Error detecting origin:', err);
     }
-  } catch (err) {
-    console.error('[ORIGIN] Error detecting origin:', err);
   }
-}
 
   setupRepSparkMessageListener() {
     console.log('[LISTENER] Setting up RepSpark message listener');
