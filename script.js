@@ -36,16 +36,16 @@ class ClubCoastCustomizer {
     this.state = { selectedLogo: '1', selectedPlacement: 'left', selectedThreadColor: 'club', logoSearchQuery: '' };
     this.isZoomed = false;
 
-    // Embedding / origins
-    this.isEmbedded = false;
-    this.allowedParentOrigins = [
-      'https://app.repspark.com',
-      'https://app.repspark.net',
-      'https://dev.repspark.net',
-      'http://localhost:37803'
-    ];
-    this.parentOrigin = 'https://app.repspark.com'; // default
-
+// Embedding / origins
+this.isEmbedded = false;
+this.allowedParentOrigins = [
+  'https://app.repspark.com',
+  'https://app.repspark.net',
+  'https://app.dev.repspark.net',
+  'https://dev.repspark.net',
+  'http://localhost:37803',
+];
+this.parentOrigin = 'https://app.dev.repspark.net'; // ← CHANGED default to dev
     this.init();
   }
 
@@ -94,24 +94,52 @@ class ClubCoastCustomizer {
     }
   }
 
-  detectParentOrigin() {
-    console.log('=== PARENT ORIGIN DETECTION ===');
-    try {
-      const ref = document.referrer ? new URL(document.referrer).origin : null;
-      console.log('[ORIGIN] Referrer:', document.referrer);
-      console.log('[ORIGIN] Parsed origin:', ref);
-      console.log('[ORIGIN] Allowed origins:', this.allowedParentOrigins);
-      
-      if (ref && this.allowedParentOrigins.includes(ref)) {
-        this.parentOrigin = ref;
-        console.log('[ORIGIN] ✓ Using referrer origin:', this.parentOrigin);
-      } else {
-        console.log('[ORIGIN] ✗ Using default origin:', this.parentOrigin);
-      }
-    } catch (err) {
-      console.error('[ORIGIN] ✗ Error detecting origin:', err);
+detectParentOrigin() {
+  console.log('=== PARENT ORIGIN DETECTION ===');
+  try {
+    // First, try to get origin from referrer
+    const ref = document.referrer ? new URL(document.referrer).origin : null;
+    console.log('[ORIGIN] Referrer:', document.referrer);
+    console.log('[ORIGIN] Parsed origin:', ref);
+    console.log('[ORIGIN] Allowed origins:', this.allowedParentOrigins);
+    
+    if (ref && this.allowedParentOrigins.includes(ref)) {
+      this.parentOrigin = ref;
+      console.log('[ORIGIN] ✓ Using referrer origin:', this.parentOrigin);
+      return;
     }
+    
+    // Fallback: check URL hostname to determine environment
+    const hostname = window.location.hostname;
+    console.log('[ORIGIN] Current hostname:', hostname);
+    
+    if (hostname.includes('localhost') || hostname.includes('127.0.0.1')) {
+      this.parentOrigin = 'http://localhost:37803';
+      console.log('[ORIGIN] ✓ Using localhost origin:', this.parentOrigin);
+    } else if (hostname.includes('dev')) {
+      this.parentOrigin = 'https://api.dev.repspark.net';
+      console.log('[ORIGIN] ✓ Using dev origin:', this.parentOrigin);
+    } else if (hostname.includes('repspark.net')) {
+      this.parentOrigin = 'https://app.repspark.net';
+      console.log('[ORIGIN] ✓ Using net origin:', this.parentOrigin);
+    } else if (hostname.includes('repspark.com')) {
+      this.parentOrigin = 'https://app.repspark.com';
+      console.log('[ORIGIN] ✓ Using com origin:', this.parentOrigin);
+    } else {
+      // Try to infer from current URL
+      const currentOrigin = window.location.origin;
+      console.log('[ORIGIN] Using current origin as fallback:', currentOrigin);
+      this.parentOrigin = currentOrigin;
+    }
+    
+    console.log('[ORIGIN] Final parentOrigin:', this.parentOrigin);
+  } catch (err) {
+    console.error('[ORIGIN] ✗ Error detecting origin:', err);
+    // Safe fallback to dev
+    this.parentOrigin = 'https://api.dev.repspark.net';
+    console.log('[ORIGIN] Using safe fallback:', this.parentOrigin);
   }
+}
 
   setupRepSparkMessageListener() {
     console.log('[LISTENER] Setting up RepSpark message listener');
