@@ -41,12 +41,11 @@ this.isEmbedded = false;
 this.allowedParentOrigins = [
   'https://app.repspark.com',
   'https://app.repspark.net',
-  'https://app.dev.repspark.com',  // ← CORRECT DEV URL
+  'https://app.dev.repspark.com',  // ← ADD THIS LINE
   'https://dev.repspark.net',
-  'http://localhost:37803',
-  'http://localhost:3000'
+  'http://localhost:37803'
 ];
-this.parentOrigin = 'https://app.dev.repspark.com'; // ← DEFAULT TO CORRECT DEV
+this.parentOrigin = 'https://app.dev.repspark.com'; // default - leave as is
   }
 
   init() {
@@ -96,32 +95,17 @@ this.parentOrigin = 'https://app.dev.repspark.com'; // ← DEFAULT TO CORRECT DE
 
 detectParentOrigin() {
   console.log('=== PARENT ORIGIN DETECTION ===');
-  console.log('[ORIGIN] document.referrer:', document.referrer);
-  console.log('[ORIGIN] window.location:', window.location.href);
-  
   try {
-    if (document.referrer) {
-      // Extract origin from referrer
-      const referrerUrl = new URL(document.referrer);
-      this.parentOrigin = referrerUrl.origin;
-      
-      console.log('[ORIGIN] Extracted parent origin:', this.parentOrigin);
-      
-      // Add to allowed list if not already there
-      if (!this.allowedParentOrigins.includes(this.parentOrigin)) {
-        console.log('[ORIGIN] Adding', this.parentOrigin, 'to allowed origins');
-        this.allowedParentOrigins.push(this.parentOrigin);
-      }
-      
-      console.log('[ORIGIN] ✓ Final parentOrigin:', this.parentOrigin);
-    } else {
-      // No referrer - use CORRECT dev as safe default
-      console.warn('[ORIGIN] No referrer - defaulting to dev');
-      this.parentOrigin = 'https://app.dev.repspark.com';  // ← FIXED
+    const ref = document.referrer ? new URL(document.referrer).origin : null;
+    console.log('[ORIGIN] Referrer:', document.referrer);
+    console.log('[ORIGIN] Parsed origin:', ref);
+    
+    if (ref && this.allowedParentOrigins.includes(ref)) {
+      this.parentOrigin = ref;
+      console.log('[ORIGIN] ✓ Using referrer origin:', this.parentOrigin);
     }
   } catch (err) {
-    console.error('[ORIGIN] Error:', err);
-    this.parentOrigin = 'https://app.dev.repspark.com';  // ← FIXED
+    console.error('[ORIGIN] Error detecting origin:', err);
   }
 }
 
