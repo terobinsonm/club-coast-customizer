@@ -41,10 +41,10 @@ class ClubCoastCustomizer {
     this.allowedParentOrigins = [
       'https://app.repspark.com',
       'https://app.repspark.net',
-      'https://dev.repspark.net',
+      'https://app.dev.repspark.com',
       'http://localhost:37803'
     ];
-    this.parentOrigin = 'https://app.repspark.com'; // default
+    this.parentOrigin = 'https://app.dev.repspark.com'; // default
 
     this.init();
   }
