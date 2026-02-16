@@ -20,14 +20,14 @@ module.exports = async (req, res) => {
     const publicKey = publicKeyRaw.replace(/\\n/g, '\n');
 
     // RepSpark standard issuer for init tokens
-    const allowedIssuers = ['repspark.net'];
+    const allowedIssuers = ['https://app.repspark.com'];
 
     // Verify RS256 signature & claims from RepSpark
     const claims = jwt.verify(token, publicKey, {
       algorithms: ['RS256'],
       issuer: allowedIssuers,
       audience: expectedAudience,  // e.g., https://club-coast-customizer.vercel.app
-      clockTolerance: 30           // small clock skew (seconds)
+      clockTolerance: 0           // small clock skew (seconds)
     });
 
     // Handle 'compressed' + 'payload'
