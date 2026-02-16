@@ -29,7 +29,7 @@ module.exports = async (req, res) => {
         iat: nowSec,
         exp: nowSec + 5 * 60,
         iss: (process.env.REPSPARK_ISSUER || '').trim(),   // e.g. https://club-coast-customizer.vercel.app
-        aud: 'repspark.net'                    // per your latest requirement
+        aud: 'https://app.repspark.com'                    // per your latest requirement
       },
       (process.env.REPSPARK_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
       { algorithm: 'RS256' }
