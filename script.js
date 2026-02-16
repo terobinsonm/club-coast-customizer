@@ -94,24 +94,23 @@ class ClubCoastCustomizer {
     }
   }
 
-  detectParentOrigin() {
-    console.log('=== PARENT ORIGIN DETECTION ===');
-    try {
-      const ref = document.referrer ? new URL(document.referrer).origin : null;
-      console.log('[ORIGIN] Referrer:', document.referrer);
-      console.log('[ORIGIN] Parsed origin:', ref);
-      console.log('[ORIGIN] Allowed origins:', this.allowedParentOrigins);
-      
-      if (ref && this.allowedParentOrigins.includes(ref)) {
-        this.parentOrigin = ref;
-        console.log('[ORIGIN] ✓ Using referrer origin:', this.parentOrigin);
-      } else {
-        console.log('[ORIGIN] ✗ Using default origin:', this.parentOrigin);
-      }
-    } catch (err) {
-      console.error('[ORIGIN] ✗ Error detecting origin:', err);
+detectParentOrigin() {
+  console.log('=== PARENT ORIGIN DETECTION ===');
+  try {
+    const ref = document.referrer ? new URL(document.referrer).origin : null;
+    console.log('[ORIGIN] Referrer:', document.referrer);
+    console.log('[ORIGIN] Parsed origin:', ref);
+
+    if (ref === 'https://app.repspark.com') {
+      this.parentOrigin = ref;
+      console.log('[ORIGIN] ✓ Using referrer origin:', this.parentOrigin);
+    } else {
+      console.log('[ORIGIN] ✗ Using default origin:', this.parentOrigin);
     }
+  } catch (err) {
+    console.error('[ORIGIN] ✗ Error detecting origin:', err);
   }
+}
 
   setupRepSparkMessageListener() {
     console.log('[LISTENER] Setting up RepSpark message listener');
@@ -123,7 +122,7 @@ class ClubCoastCustomizer {
         allowed: this.allowedParentOrigins.includes(event.origin)
       });
       
-      if (!this.allowedParentOrigins.includes(event.origin)) {
+    if (event.origin !== 'https://app.repspark.com') {
         console.warn('[MESSAGE] ✗ Rejected message from disallowed origin:', event.origin);
         return;
       }
