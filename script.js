@@ -44,7 +44,7 @@ class ClubCoastCustomizer {
       'https://app.dev.repspark.com',
       'http://localhost:37803'
     ];
-    this.parentOrigin = 'https://app.dev.repspark.com'; // default
+    this.parentOrigin = 'https://app.repspark.com'; // default
 
     this.init();
   }
