@@ -3,7 +3,9 @@ const jwt = require('jsonwebtoken');
 const zlib = require('zlib');
 
 module.exports = async (req, res) => {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
 
   try {
     const { token, expectedAudience } = req.body || {};
@@ -19,15 +21,22 @@ module.exports = async (req, res) => {
 
     const publicKey = publicKeyRaw.replace(/\\n/g, '\n');
 
-    // RepSpark standard issuer for init tokens
-    const allowedIssuers = ['https://app.repspark.com'];
+    // RepSpark init tokens use iss = "repspark.net" (not the app URL)
+    // Keep the app URLs as fallbacks in case other envs issue different values.
+    const allowedIssuers = [
+      'repspark.net',
+      'https://app.repspark.com',
+      'https://app.repspark.net',
+      'https://app.dev.repspark.com',
+      'https://dev.repspark.net'
+    ];
 
     // Verify RS256 signature & claims from RepSpark
     const claims = jwt.verify(token, publicKey, {
       algorithms: ['RS256'],
       issuer: allowedIssuers,
-      audience: expectedAudience,  // e.g., https://club-coast-customizer.vercel.app
-      clockTolerance: 0           // small clock skew (seconds)
+      audience: expectedAudience, // e.g., https://club-coast-customizer.vercel.app
+      clockTolerance: 60 // seconds of clock skew tolerance
     });
 
     // Handle 'compressed' + 'payload'
@@ -53,7 +62,7 @@ module.exports = async (req, res) => {
       }
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       payload: payloadObj,
       claims: {
         exp: claims.exp,
@@ -64,7 +73,12 @@ module.exports = async (req, res) => {
       }
     });
   } catch (err) {
+    // More actionable error for debugging; you can simplify later.
     console.error('verify-init error:', err);
-    res.status(400).json({ error: 'Invalid or expired token' });
+    return res.status(400).json({
+      error: 'Invalid token',
+      reason: err?.name || 'unknown',
+      message: err?.message || String(err)
+    });
   }
 };
