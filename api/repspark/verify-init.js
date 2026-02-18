@@ -1,6 +1,7 @@
 // /api/repspark/verify-init.js
 const jwt = require('jsonwebtoken');
 const zlib = require('zlib');
+const crypto = require('crypto');
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
@@ -17,12 +18,22 @@ module.exports = async (req, res) => {
       process.env.REPSPARK_PUBLIC_KEY ||
       process.env.RESPARK_PUBLIC_KEY || // older var name fallback
       '';
-    if (!publicKeyRaw) return res.status(500).json({ error: 'Missing REPSPARK_PUBLIC_KEY' });
+
+    if (!publicKeyRaw) {
+      return res.status(500).json({ error: 'Missing REPSPARK_PUBLIC_KEY (or RESPARK_PUBLIC_KEY)' });
+    }
 
     const publicKey = publicKeyRaw.replace(/\\n/g, '\n');
+    const keyHash = crypto.createHash('sha256').update(publicKey).digest('hex');
 
-    // RepSpark init tokens use iss = "repspark.net" (not the app URL)
-    // Keep the app URLs as fallbacks in case other envs issue different values.
+    // Decode header for debugging / key-rotation awareness
+    const decoded = jwt.decode(token, { complete: true });
+    const kid = decoded?.header?.kid || null;
+    const alg = decoded?.header?.alg || null;
+    const typ = decoded?.header?.typ || null;
+
+    // RepSpark init tokens observed with iss = "repspark.net"
+    // Keep other possibilities as fallback (won't reduce security because signature must still validate).
     const allowedIssuers = [
       'repspark.net',
       'https://app.repspark.com',
@@ -31,31 +42,29 @@ module.exports = async (req, res) => {
       'https://dev.repspark.net'
     ];
 
-    // Verify RS256 signature & claims from RepSpark
     const claims = jwt.verify(token, publicKey, {
       algorithms: ['RS256'],
       issuer: allowedIssuers,
-      audience: expectedAudience, // e.g., https://club-coast-customizer.vercel.app
-      clockTolerance: 60 // seconds of clock skew tolerance
+      audience: expectedAudience, // e.g. https://club-coast-customizer.vercel.app
+      clockTolerance: 60 // seconds
     });
 
     // Handle 'compressed' + 'payload'
     let payloadObj;
     if (claims.compressed === true) {
-      // payload is base64-encoded gzip(JSON/string)
       const buf = Buffer.from(claims.payload, 'base64');
       const text = zlib.gunzipSync(buf).toString('utf8');
       try {
         payloadObj = JSON.parse(text);
       } catch {
-        payloadObj = text; // could be XML/plain text
+        payloadObj = text;
       }
     } else {
       if (typeof claims.payload === 'string') {
         try {
           payloadObj = JSON.parse(claims.payload);
         } catch {
-          payloadObj = claims.payload; // keep raw string
+          payloadObj = claims.payload;
         }
       } else {
         payloadObj = claims.payload;
@@ -67,18 +76,53 @@ module.exports = async (req, res) => {
       claims: {
         exp: claims.exp,
         iat: claims.iat,
+        nbf: claims.nbf,
         iss: claims.iss,
         aud: claims.aud,
         compressed: !!claims.compressed
+      },
+      debug: {
+        kid,
+        alg,
+        typ,
+        keyHash
       }
     });
   } catch (err) {
-    // More actionable error for debugging; you can simplify later.
+    // Return actionable debug info (safe) so we can see *why* verification failed.
+    // NOTE: remove/trim debug in final production if desired.
+    let kid = null;
+    let alg = null;
+    let typ = null;
+
+    try {
+      const decoded = jwt.decode((req.body || {}).token, { complete: true });
+      kid = decoded?.header?.kid || null;
+      alg = decoded?.header?.alg || null;
+      typ = decoded?.header?.typ || null;
+    } catch {}
+
+    const publicKeyRaw =
+      process.env.REPSPARK_PUBLIC_KEY ||
+      process.env.RESPARK_PUBLIC_KEY ||
+      '';
+    const publicKey = publicKeyRaw ? publicKeyRaw.replace(/\\n/g, '\n') : '';
+    const keyHash = publicKey
+      ? crypto.createHash('sha256').update(publicKey).digest('hex')
+      : null;
+
     console.error('verify-init error:', err);
+
     return res.status(400).json({
       error: 'Invalid token',
       reason: err?.name || 'unknown',
-      message: err?.message || String(err)
+      message: err?.message || String(err),
+      debug: {
+        kid,
+        alg,
+        typ,
+        keyHash
+      }
     });
   }
 };
