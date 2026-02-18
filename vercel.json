@@ -5,7 +5,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "frame-ancestors https://app.repspark.com https://app.dev.repspark.com http://localhost:37803 https://app.repspark.net https://dev.repspark.net"
+          "value": "frame-ancestors https://app.repspark.com https://*.repspark.com https://app.repspark.net https://*.repspark.net http://localhost:*;"
         }
       ]
     }
